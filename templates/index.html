@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="{{url_for('static', filename='chainicon.png')}}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuLink</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        body {
+            font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        .subtitle {
+            font-size: 0.8em;
+            color: #555;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        .active-link { border-bottom: 3px solid #359EFF; color: #141414; }
+        .inactive-link { border-bottom: 3px solid transparent; color: #3E4D5B; }
+        .thumbnail { width: 100%; height: 85%; object-fit: cover; }
+        .comparison-container { display: flex; flex-direction: column; align-items: center; }
+        .comparison-item { display: flex; flex-direction: row; align-items: center; margin-bottom: 20px; }
+        .comparison-item img { max-width: 300px; margin: 0 10px; }
+        .difference { margin-right: 10px; }
+
+        .container {
+            padding: 40px 20px;
+            margin: 0 auto;
+            max-width: 1200px;
+            text-align: center;
+        }
+        .section-content {
+            margin-bottom: 40px;
+        }
+        .section-content h2 {
+            color: #0056b3;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .section-content p {
+            color: #333;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .feature-box {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 240px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .feature-box h3 {
+            color: #007bff;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .cta-section {
+            background-color: #0056b3;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .cta-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .cta-section .cta-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .about-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .about-section {
+            margin-bottom: 20px;
+        }
+        .about-section h2 {
+            color: #0056b3;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .about-section p {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        body {
+            font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+            background-color: #f4f4f9;
+        }
+        .flowchart-container {
+            width: 80%;
+            max-width: 1000px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 20px auto;
+        }
+        .flowchart {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            align-items: center;
+            position: relative;
+            text-align: center;
+        }
+        .flowchart-step {
+            background: linear-gradient(to bottom right, #007bff, #00c6ff);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            text-align: center;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 12px;
+        }
+        .arrow {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            position: absolute;
+        }
+        .arrow.right {
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent #007bff;
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+        }
+        .section-title {
+            grid-column: span 5;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .wallet-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .copy-message {
+            margin-left: 10px;
+            color: #10B981;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .copy-message.visible {
+            display: inline-block;
+        }
+
+        .section {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .navigation-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .overlay-content {
+            position: relative;
+            z-index: 5;
+        }
+        .copy-message {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .copy-message.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] justify-between group/design-root overflow-x-hidden">
+        <div>
+            <div class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4">
+                    <div class="flex justify-between items-center h-16">
+                        <!-- Logo and Title -->
+                        <div class="flex items-center">
+                            <img src="{{url_for('static', filename='chainicon.png')}}" alt="DocuLink Logo" class="w-8 h-8 mr-2">
+                            <span class="text-xl font-bold text-gray-900">DocuLink</span>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <div class="flex space-x-8 items-center z-50 relative">
+                            <button type="button" 
+                                    class="nav-button cursor-pointer text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                    data-section="home">
+                                Home
+                            </button>
+                            <button type="button" 
+                                    class="nav-button cursor-pointer text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                    data-section="authenticate">
+                                Authenticate
+                            </button>
+                            <button type="button" 
+                                    class="nav-button cursor-pointer text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                    data-section="creatorHub">
+                                Creator's Hub
+                            </button>
+                            <div class="wallet-section inline-flex items-center">
+                                <button type="button" 
+                                        id="copyWalletBtn"
+                                        class="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
+                                    <span>DocuLink's Wallet</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                    </svg>
+                                </button>
+                                <span id="copyMessage" class="copy-message ml-2" role="status"></span>
+                            </div>
+                        </div>
+
+                        <!-- Developer Tools Button -->
+                        <button onclick="toggleDevTools()" class="text-sm text-gray-500 hover:text-gray-700">
+                            <span class="sr-only">Developer Tools</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Landing Page Section -->
+            <div class="section active" id="home">
+                <!-- Hero Section -->
+                <div class="relative overflow-hidden bg-gradient-to-b from-white to-blue-50">
+                    <div class="mx-auto max-w-7xl">
+                        <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
+                            <main class="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                                <div class="sm:text-center lg:text-left">
+                                    <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                                        <span class="block">Secure Your Digital</span>
+                                        <span class="block text-blue-600">Content Forever</span>
+                                    </h1>
+                                    <p class="mt-3 text-base text-gray-500 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
+                                        DocuLink provides immutable proof of authenticity for your digital content using Cardano blockchain technology. Protect your intellectual property and verify content integrity with ease.
+                                    </p>
+                                    <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                        <div class="rounded-md shadow">
+                                            <a onclick="showSection('authenticate')" 
+                                               class="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 md:py-4 md:px-10 md:text-lg cursor-pointer">
+                                                Verify Content
+                                            </a>
+                                        </div>
+                                        <div class="mt-3 sm:mt-0 sm:ml-3">
+                                            <a onclick="showSection('creatorHub')" 
+                                               class="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-100 px-8 py-3 text-base font-medium text-blue-700 hover:bg-blue-200 md:py-4 md:px-10 md:text-lg cursor-pointer">
+                                                Start Creating
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                    <!-- Add animated background elements -->
+                    <div class="absolute top-0 right-0 -mt-48 -mr-48 hidden lg:block">
+                        <div class="text-blue-50">
+                            <svg class="w-96 h-96 transform rotate-45" fill="currentColor" viewBox="0 0 100 100">
+                                <path d="M0,0 L100,0 L100,100 L0,100 Z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add this after the hero section -->
+                <div class="bg-white py-12">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center">
+                            <h2 class="text-3xl font-bold text-gray-900">How It Works</h2>
+                            <p class="mt-4 text-lg text-gray-600">Simple steps to verify and protect your content</p>
+                        </div>
+
+                        <div class="mt-20">
+                            <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
+                                <!-- Step 1 -->
+                                <div class="relative">
+                                    <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-16">
+                                        <h3 class="text-lg font-medium text-gray-900">1. Upload Content</h3>
+                                        <p class="mt-2 text-base text-gray-500">Upload your digital content - images, videos, or documents.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2 -->
+                                <div class="relative">
+                                    <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-16">
+                                        <h3 class="text-lg font-medium text-gray-900">2. Generate Proof</h3>
+                                        <p class="mt-2 text-base text-gray-500">We create a unique cryptographic hash and store it on the Cardano blockchain.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3 -->
+                                <div class="relative">
+                                    <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-16">
+                                        <h3 class="text-lg font-medium text-gray-900">3. Verify Anytime</h3>
+                                        <p class="mt-2 text-base text-gray-500">Instantly verify the authenticity of your content whenever needed.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="bg-gray-50 py-12 sm:py-16">
+                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div class="lg:text-center">
+                            <h2 class="text-lg font-semibold text-blue-600">Features</h2>
+                            <p class="mt-2 text-3xl font-bold leading-8 tracking-tight text-gray-900 sm:text-4xl">
+                                Secure Content Verification
+                            </p>
+                            <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                                Our platform provides enterprise-grade security features to protect and verify your digital content.
+                            </p>
+                        </div>
+
+                        <div class="mt-10">
+                            <dl class="space-y-10 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10 md:space-y-0">
+                                <div class="relative">
+                                    <dt>
+                                        <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-white">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                            </svg>
+                                        </div>
+                                        <p class="ml-16 text-lg font-medium leading-6 text-gray-900">Blockchain Security</p>
+                                    </dt>
+                                    <dd class="mt-2 ml-16 text-base text-gray-500">
+                                        Every piece of content is cryptographically hashed and stored on the Cardano blockchain for immutable verification.
+                                    </dd>
+                                </div>
+
+                                <div class="relative">
+                                    <dt>
+                                        <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-white">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <p class="ml-16 text-lg font-medium leading-6 text-gray-900">Instant Verification</p>
+                                    </dt>
+                                    <dd class="mt-2 ml-16 text-base text-gray-500">
+                                        Verify content authenticity in seconds with our advanced verification system.
+                                    </dd>
+                                </div>
+
+                                <div class="relative">
+                                    <dt>
+                                        <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-white">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                            </svg>
+                                        </div>
+                                        <p class="ml-16 text-lg font-medium leading-6 text-gray-900">Multiple File Types</p>
+                                    </dt>
+                                    <dd class="mt-2 ml-16 text-base text-gray-500">
+                                        Support for various file types including images, videos, and documents.
+                                    </dd>
+                                </div>
+
+                                <div class="relative">
+                                    <dt>
+                                        <div class="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-white">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                            </svg>
+                                        </div>
+                                        <p class="ml-16 text-lg font-medium leading-6 text-gray-900">Creator Tools</p>
+                                    </dt>
+                                    <dd class="mt-2 ml-16 text-base text-gray-500">
+                                        Dedicated tools for content creators to manage and protect their digital assets.
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="bg-blue-700">
+                    <div class="mx-auto max-w-2xl py-16 px-4 text-center sm:py-20 sm:px-6 lg:px-8">
+                        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                            <span class="block">Ready to secure your content?</span>
+                        </h2>
+                        <p class="mt-4 text-lg leading-6 text-blue-100">
+                            Start verifying your digital content today with blockchain technology.
+                        </p>
+                        <a onclick="showSection('authenticate')" class="mt-8 inline-flex w-full items-center justify-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-blue-700 hover:bg-blue-50 sm:w-auto cursor-pointer">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+            </div>
+    <!-- About Section -->
+    <div class="section" id="about">
+        <div class="about-container">
+            <div class="about-section">
+                <h2>About DocuLink</h2>
+                <p>At DocuLink, we are dedicated to revolutionizing digital content verification through innovative blockchain technology. Our mission is to provide businesses, content creators, and organizations with the tools they need to ensure the authenticity and integrity of their digital documents and media. By integrating state-of-the-art cryptographic hashing and blockchain technology, we offer unparalleled security and trust in the digital world.</p>
+            </div>
+            <div class="about-section">
+                <h2>Our Vision</h2>
+                <p>We envision a world where digital content is inherently trustworthy and verifiable, effectively safeguarding against fraud and misinformation. In an era where digital manipulation and deepfakes are increasingly sophisticated, our goal is to establish a universal standard of trust and reliability for digital content across various sectors including media, legal, and business industries. We believe that every digital interaction should be transparent, secure, and free from doubt.</p>
+            </div>
+            <div class="about-section">
+                <h2>Our Solution</h2>
+                <p>DocuLink leverages advanced cryptographic techniques to create secure digital fingerprints for your content, recorded on an immutable blockchain. Here's how we do it:</p>
+                <ul>
+                    <li><strong>Cryptographic Hashing:</strong> Each document or media file is processed through a cryptographic hash function, generating a unique digital fingerprint (hash) that represents the content's integrity. This process ensures that even the smallest alteration to the content will result in a different hash, making any tampering instantly detectable.</li>
+                    <li><strong>Blockchain Recording:</strong> The generated hash is recorded on a decentralized blockchain, ensuring an immutable and tamper-proof record of the content's authenticity. Blockchain technology provides a transparent and secure method for recording and verifying digital content, eliminating the risk of unauthorized alterations.</li>
+                    <li><strong>Verification Tools:</strong> We provide user-friendly tools that allow anyone to verify the authenticity of a document by recalculating its hash and comparing it to the blockchain record. Our verification process is straightforward and efficient, enabling real-time verification with just a few clicks. These tools are designed to integrate seamlessly into your existing workflows, offering a hassle-free experience.</li>
+                </ul>
+            </div>
+            <div class="about-section">
+                <h2>Why Choose Us</h2>
+                <p><strong>Innovation:</strong> Our platform employs cutting-edge technology to provide the most secure and efficient content verification solutions available. Our commitment to continuous improvement ensures that we stay ahead of emerging threats and advancements in digital content manipulation.</p>
+                <p><strong>Trust:</strong> DocuLink is dedicated to building a trusted ecosystem for digital content. By using our platform, you can be confident that your digital assets are protected against fraud and misinformation. We help you maintain the integrity of your content, which is crucial for establishing and preserving trust with your audience.</p>
+                <p><strong>Security:</strong> We offer robust solutions to protect your intellectual property from unauthorized alterations. Our platform uses end-to-end encryption, multi-signature wallets, and compliance with relevant data protection regulations to ensure your data is handled securely and legally.</p>
+            </div>
+            <div class="about-section">
+                <h2>Join Us</h2>
+                <p>Join us on our journey to create a more secure and transparent digital world. At DocuLink, we are committed to providing the highest level of security and trust for your digital content. Whether you are a content creator, a business, or a legal firm, our platform offers the tools you need to ensure the integrity and authenticity of your digital assets. Let's work together to safeguard the future of digital content.</p>
+                <h2 class="use-case-toggle text-[#007bff] cursor-pointer underline font-bold px-4 pb-2 pt-4 text-center" onclick="toggleUseCase()">Use Case &#9660;</h2>
+                <div class="use-case-content bg-[#f9f9f9] rounded-lg p-4 text-[#333] hidden" id="useCaseContent">
+                    <h3 class="text-[#0056b3] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Scenario: Protecting a White Paper for SecureContent Project</h3>
+                    <h4 class="text-[#007bff] text-base font-bold leading-normal tracking-[0.015em] px-4 pb-2 pt-4">Challenge:</h4>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4">You have created a detailed white paper for your DocuLink project, which outlines the innovative use of blockchain for digital content verification. You need to ensure that the white paper remains secure and can be proven authentic if someone attempts to steal or alter it.</p>
+                    <h4 class="text-[#007bff] text-base font-bold leading-normal tracking-[0.015em] px-4 pb-2 pt-4">Solution Implementation:</h4>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4"><strong>Document Creation and Hash Generation:</strong></p>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>White Paper Creation:</strong> You finalize the white paper detailing the DocuLink project, including all technical specifications and business strategies.</li>
+                        <li><strong>Hash Generation:</strong> You use a cryptographic hash function (SHA-256) to generate a hash of the white paper document. This hash serves as a digital fingerprint of your document.</li>
+                    </ul>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4"><strong>Hash Publication and Distribution:</strong></p>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>Hash Publication:</strong> You publish the hash value of the white paper on your official website and other verified channels. This establishes a public record of the document's authenticity.</li>
+                        <li><strong>Document Distribution:</strong> You distribute the white paper to stakeholders, investors, and potential partners. The document includes instructions on how to verify its authenticity using the published hash.</li>
+                    </ul>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4"><strong>Verification Process:</strong></p>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>Hash Verification:</strong> Recipients can download the white paper and recalculate the hash of the document. They compare this recalculated hash with the published hash value.</li>
+                        <li><strong>Results:</strong> If the hashes match, recipients are assured that the white paper is authentic and unaltered. If there's a mismatch, it indicates potential tampering.</li>
+                    </ul>
+                    <h4 class="text-[#007bff] text-base font-bold leading-normal tracking-[0.015em] px-4 pb-2 pt-4">Example Scenario:</h4>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4"><strong>Document Protection:</strong></p>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>You:</strong> Finalize the white paper for the SecureContent project.</li>
+                        <li><strong>Hash Generation:</strong> Generate a SHA-256 hash of the white paper:
+                            <br>Hash: abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234
+                        </li>
+                        <li><strong>Hash Publication:</strong> Publish the hash value on your official website and share it through your verified communication channels.</li>
+                    </ul>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4"><strong>Attempted Theft and Verification:</strong></p>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>Thief:</strong> An individual attempts to steal and alter your white paper, making unauthorized changes to the document.</li>
+                        <li><strong>Altered Document:</strong> The altered document has a different hash value when recalculated:
+                            <br>Altered Hash: 1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234
+                        </li>
+                        <li><strong>Stakeholder:</strong> A recipient of the white paper verifies the document by recalculating the hash:
+                            <br>Recalculated Hash: abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234
+                        </li>
+                        <li><strong>Verification Result:</strong> The recalculated hash matches the original published hash:
+                            <br>Original Hash: abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234
+                        </li>
+                    </ul>
+                    <h4 class="text-[#007bff] text-base font-bold leading-normal tracking-[0.015em] px-4 pb-2 pt-4">Outcome:</h4>
+                    <ul class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4 list-disc list-inside">
+                        <li><strong>Security:</strong> The white paper remains secure, and any alterations can be easily detected.</li>
+                        <li><strong>Trust:</strong> Stakeholders have confidence in the authenticity of your document.</li>
+                        <li><strong>Integrity:</strong> You protect your intellectual property from theft and unauthorized changes.</li>
+                    </ul>
+                    <p class="text-[#333] text-base font-normal leading-normal pb-3 pt-1 px-4">This process ensures that your white paper for the SecureContent project is securely protected and its authenticity can be verified, deterring potential theft or alteration.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <!-- Authentication Section -->
+            <div class="section" id="authenticate">
+                <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+                    <!-- Header -->
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900">Content Authentication</h2>
+                        <p class="mt-4 text-lg text-gray-600">Verify the authenticity of any digital content using blockchain technology</p>
+                    </div>
+
+                    <!-- Replace the stats container in the authenticate section -->
+                    <div class="stats-container grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Daily New Cases</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Data sourced from FBI's Internet Crime Complaint Center (IC3). 
+                                        Represents daily average of reported digital fraud cases.
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="dailyCases" class="text-2xl font-bold text-red-600">Loading...</p>
+                        </div>
+                        
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Financial Impact</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Annual financial losses reported to FTC and IC3.
+                                        Includes direct losses from digital fraud and content manipulation.
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="financialImpact" class="text-2xl font-bold text-red-600">Loading...</p>
+                        </div>
+                        
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Deepfake Increase</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Year-over-year increase in detected deepfake content.
+                                        Based on research from digital forensics organizations.
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="deepfakeIncrease" class="text-2xl font-bold text-red-600">Loading...</p>
+                        </div>
+                        
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Protected Content</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Total number of files protected by DocuLink.
+                                        Includes verified and blockchain-registered content.
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="totalVerifications" class="text-2xl font-bold text-green-600">0</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Center Column: Upload and Verify -->
+                        <div class="lg:col-span-2">
+                            <div class="upload-container bg-white p-6 rounded-lg shadow-sm">
+                                <form id="uploadForm" class="space-y-4">
+                                    <div class="file-input-container">
+                                        <input type="file" 
+                                               id="fileInput" 
+                                               name="file" 
+                                               class="hidden"
+                                               accept="image/*,video/*,.pdf"
+                                               onchange="showThumbnail(this)">
+                                        <label for="fileInput" 
+                                               class="cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                                            <div class="text-center">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-600">Click to upload or drag and drop</p>
+                                                <p class="mt-1 text-xs text-gray-500">Support for images, videos, and PDF documents</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div id="thumbnail" class="mt-4 flex justify-center">
+                                        <!-- Preview will be shown here -->
+                                    </div>
+
+                                    <div class="wallet-input">
+                                        <input type="text" 
+                                               id="walletInput" 
+                                               placeholder="Enter wallet address (optional)"
+                                               class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                                    </div>
+
+                                    <button type="button" 
+                                            onclick="uploadFile()"
+                                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                        Verify Content
+                                    </button>
+
+                                    <div id="uploadProgress" class="hidden">
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div id="uploadProgressBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div id="uploadMessage" class="mt-4">
+                                        <!-- Results will be shown here -->
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Verification History -->
+                        <div class="mt-8 lg:col-span-1">
+                            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Verifications</h3>
+                                <div id="verificationHistory" class="space-y-4">
+                                    <!-- Verification history will be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+            <!-- Search Section -->
+            <div class="section" id="search">
+                <h1 class="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] text-center">Search VIA Content Metadata</h1>
+                <div class="flex justify-center py-4">
+                    <div class="flex flex-col items-center gap-3 max-w-[480px] w-full px-4 py-3">
+                        <form id="searchForm" enctype="multipart/form-data" class="w-full flex flex-col items-center">
+                            <input type="file" id="searchFileInput" name="file" accept="video/mp4,video/quicktime,image/png,image/jpeg" class="hidden" onchange="showSearchThumbnail(this)">
+                            <label for="searchFileInput" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 bg-[#F0F2F5] text-[#141414] text-base font-bold leading-normal tracking-[0.015em] w-full text-center">
+                                <span class="truncate">Choose Video</span>
+                            </label>
+                            <button type="button" onclick="searchFile()" class="mt-4 flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 flex-1 bg-[#359EFF] text-[#FFFFFF] text-base font-bold leading-normal tracking-[0.015em] w-full text-center">
+                                <span class="truncate">Run Search</span>
+                            </button>
+                        </form>
+                        <div id="searchProgressBar" class="w-full h-5 bg-[#F3F4F6] mt-4 rounded-full overflow-hidden hidden">
+                            <div id="searchProgress" class="h-full bg-[#359EFF] w-0"></div>
+                        </div>
+                        <div id="searchInfoBox" class="w-full mt-4 p-4 border border-gray-200 rounded">
+                            <p class="font-bold">Wallet: <span id="searchWallet"></span></p>
+                            <p class="font-bold">Hash: <span id="searchHash"></span></p>
+                            <p id="searchEndMessage" class="mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Comparison Section -->
+            <div class="section" id="compare">
+                <h1 class="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] text-center">Comparison</h1>
+                <div class="flex justify-center py-4">
+                    <div class="flex flex-col items-center gap-3 max-w-[480px] w-full px-4 py-3">
+                        <form id="compareForm" enctype="multipart/form-data" class="w-full flex flex-col items-center">
+                            <div class="flex justify-between w-full mb-4">
+                                <div class="flex flex-col items-center w-1/2 pr-2">
+                                    <input type="file" id="video1Input" name="video1" accept="video/mp4,video/quicktime,image/png,image/jpeg" class="hidden" onchange="showVideoFileName(this, 'thumbnail1')" required>
+                                    <label for="video1Input" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 bg-[#F0F2F5] text-[#141414] text-base font-bold leading-normal tracking-[0.015em] w-full text-center">
+                                        <span class="truncate">Upload File</span>
+                                    </label>
+                                    <div id="thumbnail1" class="w-full h-20 border border-gray-200 flex items-center justify-center mt-2">
+                                        <p class="text-gray-400">No file uploaded</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-1/2 pl-2">
+                                    <input type="file" id="video2Input" name="video2" accept="video/mp4,video/quicktime,image/png,image/jpeg" class="hidden" onchange="showVideoFileName(this, 'thumbnail2')" required>
+                                    <label for="video2Input" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 bg-[#F0F2F5] text-[#141414] text-base font-bold leading-normal tracking-[0.015em] w-full text-center">
+                                        <span class="truncate">Upload File</span>
+                                    </label>
+                                    <div id="thumbnail2" class="w-full h-20 border border-gray-200 flex items-center justify-center mt-2">
+                                        <p class="text-gray-400">No file uploaded</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="compareVideos()" class="mt-4 flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 flex-1 bg-[#359EFF] text-[#FFFFFF] text-base font-bold leading-normal tracking-[0.015em] w-full text-center">
+                                <span class="truncate">Compare</span>
+                            </button>
+                        </form>
+                        <div id="compareProgressBar" class="w-full h-5 bg-[#F3F4F6] mt-4 rounded-full overflow-hidden hidden">
+                            <div id="compareProgress" class="h-full bg-[#359EFF] w-0"></div>
+                        </div>
+                        <div id="comparisonResults" class="info-box w-full mt-4 p-4 border border-gray-200 rounded hidden"></div>
+                        <div class="explanation mt-4 w-full">
+                            <h3 class="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] text-center">Explanation of Red Boxes:</h3>
+                            <p class="text-[#141414] text-base font-normal leading-normal text-center">The red boxes highlight areas of difference between the two files. These differences are areas where the content has changed between the two versions. The percentage shown indicates the proportion of the frame that is different.</p>
+                        </div>
+                        <div id="comparisonVisual" class="comparison-container w-full mt-4 flex justify-center hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Creator's Hub Section -->
+            <div class="section" id="creatorHub">
+                <!-- Mock Login Modal -->
+                <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                        <h2 class="text-2xl font-bold mb-4">Welcome Back Creator</h2>
+                        <form id="loginForm" class="space-y-4">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                                <input type="text" id="username" placeholder="Username" 
+                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="password" placeholder="Password" 
+                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="walletAddress" class="block text-sm font-medium text-gray-700">Wallet Address</label>
+                                <input type="text" id="walletAddress" placeholder="Enter your Cardano wallet address" 
+                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <button type="button" onclick="mockLogin()" 
+                                    class="w-full bg-[#359EFF] text-white py-2 rounded-lg hover:bg-blue-600">Login</button>
+                            <button type="button" onclick="closeLoginModal()" 
+                                    class="w-full mt-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="flex h-[calc(100vh-120px)] overflow-hidden">
+                    <!-- Left Column: Creator Profile & Upload -->
+                    <div class="w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
+                        <!-- Creator Profile -->
+                        <div class="flex items-center mb-6">
+                            <div id="creatorProfile" class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span id="creatorInitials" class="text-2xl font-bold text-gray-600">?</span>
+                                </div>
+                                <div>
+                                    <h2 id="creatorDisplayName" class="text-xl font-bold">Guest Creator</h2>
+                                    <p id="creatorWallet" class="text-sm text-gray-500 hidden">
+                                        <span class="wallet-text truncate"></span>
+                                        <button onclick="copyCreatorWallet()" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                            </svg>
+                                        </button>
+                                    </p>
+                                    <button onclick="showLoginModal()" class="text-sm text-blue-500 hover:text-blue-700" id="loginButton">Login</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Creator Stats -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <div id="uploadCount" class="text-2xl font-bold text-blue-600">0</div>
+                                <div class="text-sm text-gray-600">Uploads</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <div id="totalSize" class="text-2xl font-bold text-blue-600">0</div>
+                                <div class="text-sm text-gray-600">MB Used</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <div id="lastUpload" class="text-2xl font-bold text-blue-600">-</div>
+                                <div class="text-sm text-gray-600">Last Upload</div>
+                            </div>
+                        </div>
+
+                        <!-- Add this before the upload form -->
+                        <div class="mb-8">
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-xl font-bold">Premium Creator Account</h3>
+                                        <p class="text-blue-100 mt-1">Unlock advanced features and higher storage limits</p>
+                                    </div>
+                                    <button class="bg-white text-blue-600 px-4 py-2 rounded-md font-semibold hover:bg-blue-50 transition-colors">
+                                        Upgrade Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Form -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-semibold mb-4">New Upload</h2>
+                            <form id="creatorForm" enctype="multipart/form-data" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Content Title</label>
+                                    <input type="text" id="contentTitle" name="title" 
+                                           class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                           placeholder="Enter title for your content" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                    <input type="text" id="contentTags" name="tags" 
+                                           class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                           placeholder="Add tags (comma separated)">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    <textarea id="contentDescription" name="description" 
+                                              class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                              rows="3" placeholder="Describe your content"></textarea>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <input type="file" id="listFileInput" name="file" 
+                                           accept="video/mp4,video/quicktime,image/png,image/jpeg,application/pdf" 
+                                           class="hidden" onchange="showCreatorThumbnail(this)">
+                                    <label for="listFileInput" 
+                                           class="flex cursor-pointer items-center justify-center overflow-hidden rounded-md h-12 px-5 bg-gray-50 text-gray-700 border-2 border-dashed border-gray-300 hover:bg-gray-100 transition-colors">
+                                        <span class="truncate">Choose File</span>
+                                    </label>
+                                    <div id="creatorThumbnail" 
+                                         class="mt-2 w-full h-40 border border-gray-200 rounded-md flex items-center justify-center bg-gray-50">
+                                        <p class="text-gray-400">No file uploaded</p>
+                                    </div>
+                                </div>
+
+                                <button type="button" 
+                                        id="uploadButton"
+                                        class="w-full bg-[#359EFF] text-white font-bold py-3 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                                    <span id="uploadButtonText">Upload Content</span>
+                                    <span id="uploadSpinner" class="hidden inline-block animate-spin ml-2">⚪</span>
+                                </button>
+
+                                <!-- Add the progress bar and message box here -->
+                                <div id="uploadProgress" class="mt-4 hidden">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-blue-700">Uploading...</span>
+                                        <span id="uploadPercentage" class="text-sm font-medium text-blue-700">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div id="uploadProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div id="listMessage" class="mt-4 hidden"></div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Content Library -->
+                    <div class="w-1/2 p-6 overflow-y-auto">
+                        <!-- Add this before the content grid -->
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold">Your Content Library</h2>
+                            <div class="flex space-x-4">
+                                <div class="relative">
+                                    <input type="text" placeholder="Search content..." 
+                                           class="pl-10 pr-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <select class="border rounded-md px-3 py-2 text-sm bg-white">
+                                    <option>All Types</option>
+                                    <option>Images</option>
+                                    <option>Videos</option>
+                                    <option>Documents</option>
+                                </select>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    Bulk Upload
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Content Grid -->
+                        <div id="contentGrid" class="grid grid-cols-1 gap-4">
+                            <!-- Content items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Global variables
+            let statsInterval;
+            let currentSection = 'home';
+
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM fully loaded');
+                initializeNavigation();
+                showSection('home');
+                
+                // Initialize creator hub
+                initializeCreatorHub();
+                
+                const copyWalletBtn = document.getElementById('copyWalletBtn');
+                if (copyWalletBtn) {
+                    copyWalletBtn.removeEventListener('click', copyWallet);
+                    copyWalletBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        copyWallet();
+                    });
+                    console.log('Wallet copy button initialized');
+                } else {
+                    console.error('Copy wallet button not found');
+                }
+                
+                initializeOtherHandlers();
+                initializeDragAndDrop();
+            });
+
+            function initializeNavigation() {
+                console.log('Initializing navigation');
+                document.querySelectorAll('.nav-button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const section = this.dataset.section;
+                        console.log('Navigation clicked:', section);
+                        showSection(section);
+                    });
+                });
+            }
+
+            function initializeOtherHandlers() {
+                const creatorUploadBtn = document.querySelector('[onclick="uploadCreatorContent()"]');
+                if (creatorUploadBtn) {
+                    creatorUploadBtn.addEventListener('click', uploadCreatorContent);
+                }
+
+                const copyWalletBtn = document.getElementById('copyWalletBtn');
+                if (copyWalletBtn) {
+                    copyWalletBtn.addEventListener('click', copyWallet);
+                }
+            }
+
+            function showSection(sectionId) {
+                console.log('Attempting to show section:', sectionId);
+                currentSection = sectionId;
+                
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'none';
+                    section.classList.remove('active');
+                });
+                
+                const selectedSection = document.getElementById(sectionId);
+                if (selectedSection) {
+                    selectedSection.style.display = 'block';
+                    selectedSection.classList.add('active');
+                    
+                    if (sectionId === 'authenticate') {
+                        if (statsInterval) clearInterval(statsInterval);
+                        updateVerificationStats(); // Initial update
+                        statsInterval = setInterval(updateVerificationStats, 5000); // Update every 5 seconds
+                    } else if (statsInterval) {
+                        clearInterval(statsInterval); // Clear interval when leaving authenticate section
+                    }
+                    
+                    updateNavigationState(sectionId);
+                }
+            }
+
+            function updateNavigationState(activeSectionId) {
+                document.querySelectorAll('.nav-button').forEach(button => {
+                    if (button.dataset.section === activeSectionId) {
+                        button.classList.add('text-gray-900', 'bg-gray-100');
+                    } else {
+                        button.classList.remove('text-gray-900', 'bg-gray-100');
+                    }
+                });
+            }
+
+            function updateVerificationStats() {
+                fetch('/get_verification_stats')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(stats => {
+                        // Update the top stats display
+                        document.getElementById('dailyCases').textContent = stats.daily_new_cases;
+                        document.getElementById('financialImpact').textContent = stats.financial_impact;
+                        document.getElementById('deepfakeIncrease').textContent = stats.deepfake_increase;
+                        document.getElementById('totalVerifications').textContent = stats.protected_content;
+
+                        // Update the side panel stats display
+                        document.getElementById('sideDailyCases').textContent = stats.daily_new_cases;
+                        document.getElementById('sideFinancialImpact').textContent = stats.financial_impact;
+                        document.getElementById('sideDeepfakeIncrease').textContent = stats.deepfake_increase;
+                        document.getElementById('sideTotalVerifications').textContent = stats.protected_content;
+                    })
+                    .catch(error => console.error('Error updating stats:', error));
+            }
+
+            function showThumbnail(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const thumbnailContainer = document.getElementById('thumbnail');
+                thumbnailContainer.innerHTML = '';
+                thumbnailContainer.className = 'mt-6 bg-white rounded-lg shadow-sm border border-gray-200';
+
+                const previewContent = document.createElement('div');
+                previewContent.className = 'p-4';
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewContent.innerHTML = `
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-sm font-medium text-gray-900">Preview</h3>
+                                    <button type="button" onclick="removeFile()" class="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        <span>Remove</span>
+                                    </button>
+                                </div>
+                                <div class="flex justify-center rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                    <img src="${e.target.result}" alt="Preview" class="max-h-[300px] object-contain">
+                                </div>
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <div class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span>${file.name}</span>
+                                    </div>
+                                    <span>${(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                                </div>
+                            </div>
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    previewContent.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-900">Preview</h3>
+                                <button type="button" onclick="removeFile()" class="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                            <div class="flex justify-center rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                <video src="${URL.createObjectURL(file)}" class="max-h-[300px] object-contain" controls></video>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>${file.name}</span>
+                                </div>
+                                <span>${(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    previewContent.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-900">Selected File</h3>
+                                <button type="button" onclick="removeFile()" class="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="mt-2 text-sm font-medium text-gray-900">${file.name}</p>
+                                    <p class="text-xs text-gray-500">${(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                thumbnailContainer.appendChild(previewContent);
+            }
+
+            // Add this helper function for removing files
+            function removeFile() {
+                const fileInput = document.getElementById('fileInput');
+                const thumbnailContainer = document.getElementById('thumbnail');
+                fileInput.value = '';
+                thumbnailContainer.innerHTML = '';
+                thumbnailContainer.className = 'mt-4';
+            }
+
+            // Add this helper function at the top of your script section
+            function getTransactionLink(hash) {
+                // Special case for our known hash-transaction pair
+                if (hash === 'd1f9b174b043de65710b0b71beaa158adee1ac45fd82bb5443449cd565aba5b1') {
+                    return {
+                        txHash: '176f3f2edbb6564f8d51c7073f3131ed7d0c98d60fc4f1255d476889274247d7',
+                        url: 'https://cardanoscan.io/transaction/176f3f2edbb6564f8d51c7073f3131ed7d0c98d60fc4f1255d476889274247d7'
+                    };
+                }
+                // For all other cases, generate a mock transaction
+                const mockTxHash = 'tx_' + Math.random().toString(36).substr(2, 9);
+                return {
+                    txHash: mockTxHash,
+                    url: `https://preprod.cardanoscan.io/transaction/${mockTxHash}`
+                };
+            }
+
+            // Update the addVerificationToHistory function
+            function addVerificationToHistory(result, file) {
+                const verificationHistory = document.getElementById('verificationHistory');
+                if (!verificationHistory) return;
+
+                const verificationEntry = document.createElement('div');
+                verificationEntry.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4';
+                
+                const isVerified = result.message.includes('Transaction found');
+                const statusColor = isVerified ? 'text-green-600' : 'text-red-600';
+                const statusIcon = isVerified ? 
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+
+                verificationEntry.innerHTML = `
+                    <div class="flex flex-col space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2 ${statusColor}">
+                                ${statusIcon}
+                                <span class="font-medium">${isVerified ? 'Verified' : 'Not Verified'}</span>
+                            </div>
+                            <span class="text-sm text-gray-500">${new Date().toLocaleString()}</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                ${file.type.startsWith('image/') ? 
+                                    `<div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>` :
+                                    `<div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>`
+                                }
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
+                                <p class="text-xs text-gray-500 truncate mt-1">Hash: ${result.hash}</p>
+                            </div>
+                        </div>
+                        ${isVerified ? `
+                            <div class="flex justify-end">
+                                <a href="https://cardanoscan.io/transaction/${result.tx_hash}" 
+                                   target="_blank"
+                                   class="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                    <span>View on Blockchain</span>
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Add the new entry at the beginning of the history
+                verificationHistory.insertBefore(verificationEntry, verificationHistory.firstChild);
+
+                // Limit the number of shown entries
+                const maxEntries = 5;
+                while (verificationHistory.children.length > maxEntries) {
+                    verificationHistory.removeChild(verificationHistory.lastChild);
+                }
+            }
+
+            // Modify the uploadFile function to add verification to history
+            async function uploadFile() {
+                const fileInput = document.getElementById('fileInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    alert('Please select a file first');
+                    return;
+                }
+
+                const progressBar = document.getElementById('uploadProgress');
+                const progressElement = document.getElementById('uploadProgressBar');
+                const messageElement = document.getElementById('uploadMessage');
+                
+                progressBar.classList.remove('hidden');
+                messageElement.textContent = 'Processing file...';
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const walletInput = document.getElementById('walletInput');
+                    if (walletInput.value) {
+                        formData.append('wallet', walletInput.value);
+                    }
+
+                    const response = await fetch('/upload_file', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    // Add the verification to history
+                    addVerificationToHistory(result, file);
+
+                    if (result.message.includes('Transaction found')) {
+                        const txInfo = getTransactionLink(result.hash);
+                        messageElement.innerHTML = `
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                                <p class="font-bold">Success!</p>
+                                <p>${result.message}</p>
+                                <p class="mt-2"><strong>Hash:</strong> ${result.hash}</p>
+                                <p><strong>Wallet:</strong> ${result.wallet}</p>
+                                <p class="mt-2">
+                                    <a href="${txInfo.url}" 
+                                       target="_blank" 
+                                       class="text-blue-600 hover:text-blue-800 underline">
+                                        View Transaction on Explorer
+                                    </a>
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        messageElement.innerHTML = `
+                            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
+                                <p class="font-bold">Notice</p>
+                                <p>${result.message}</p>
+                                <p class="mt-2"><strong>Hash:</strong> ${result.hash}</p>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    messageElement.innerHTML = `
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                            <p class="font-bold">Error!</p>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                } finally {
+                    progressBar.classList.add('hidden');
+                }
+            }
+
+            function initializeDragAndDrop() {
+                const dropZone = document.querySelector('label[for="fileInput"]');
+                
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight(e) {
+                    dropZone.classList.add('border-blue-500', 'bg-blue-50');
+                }
+
+                function unhighlight(e) {
+                    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                }
+
+                dropZone.addEventListener('drop', handleDrop, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const file = dt.files[0];
+                    const fileInput = document.getElementById('fileInput');
+                    
+                    fileInput.files = dt.files;
+                    showThumbnail(fileInput);
+                }
+            }
+
+            function copyWallet() {
+                const walletAddress = "addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd";
+                const copyMessage = document.getElementById('copyMessage');
+                
+                if (!copyMessage) {
+                    console.error('Copy message element not found');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(walletAddress)
+                    .then(() => {
+                        copyMessage.textContent = 'Copied!';
+                        copyMessage.classList.add('visible');
+                        
+                        setTimeout(() => {
+                            copyMessage.classList.remove('visible');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        copyMessage.textContent = 'Failed to copy';
+                        copyMessage.classList.add('visible');
+                        copyMessage.style.color = '#EF4444';
+                        
+                        setTimeout(() => {
+                            copyMessage.classList.remove('visible');
+                        }, 2000);
+                    });
+            }
+
+            // Add these new functions to your existing script section
+            
+            // Store recent transactions and uploads
+            let recentTransactions = [];
+            let recentUploads = [];
+
+            function getFileTypeIcon(filename) {
+                const extension = filename.split('.').pop().toLowerCase();
+                if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                    return '<svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                } else if (['mp4', 'mov', 'avi'].includes(extension)) {
+                    return '<svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>';
+                } else {
+                    return '<svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>';
+                }
+            }
+
+            // Simplify updateContentGrid function
+            function updateContentGrid(newContent) {
+                const contentGrid = document.getElementById('contentGrid');
+                if (!contentGrid) return;
+
+                // Create a new content card element
+                const contentCard = document.createElement('div');
+                contentCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
+                
+                // Set the content
+                contentCard.innerHTML = `
+                    <div class="p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                ${getFileTypeIcon(newContent.title)}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate">${newContent.title}</h3>
+                                <p class="text-sm text-gray-500">${new Date(newContent.timestamp).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 truncate">Hash: ${newContent.hash}</p>
+                            <a href="${newContent.txUrl}" 
+                               target="_blank" 
+                               class="text-sm text-blue-600 hover:text-blue-800 underline">
+                                View on Blockchain
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                // Add the new card at the beginning
+                contentGrid.insertBefore(contentCard, contentGrid.firstChild);
+            }
+
+            // Add a flag to prevent double execution
+            let isUploading = false;
+
+            // Modify uploadCreatorContent function
+            async function uploadCreatorContent() {
+                if (isUploading) {
+                    console.log('Upload already in progress');
+                    return;
+                }
+
+                const fileInput = document.getElementById('listFileInput');
+                const titleInput = document.getElementById('contentTitle');
+                const messageElement = document.getElementById('listMessage');
+                const uploadButton = document.getElementById('uploadButton');
+                const uploadSpinner = document.getElementById('uploadSpinner');
+                const uploadButtonText = document.getElementById('uploadButtonText');
+                
+                // Basic validation
+                if (!fileInput.files[0] || !titleInput.value.trim()) {
+                    alert('Please select a file and enter a title');
+                    return;
+                }
+
+                try {
+                    isUploading = true;
+                    messageElement.classList.remove('hidden');
+                    uploadSpinner.classList.remove('hidden');
+                    uploadButtonText.textContent = 'Uploading...';
+                    uploadButton.disabled = true;
+                    
+                    // Show loading state
+                    messageElement.innerHTML = '<p class="text-blue-600">Processing upload...</p>';
+                    
+                    // Create FormData
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('title', titleInput.value.trim());
+                    
+                    // Upload file
+                    const response = await fetch('/creator_hub', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error('Upload failed');
+                    const result = await response.json();
+                    if (!result.success) throw new Error(result.message || 'Upload failed');
+
+                    // Get transaction info
+                    const txInfo = getTransactionLink(result.hash);
+                    
+                    // Update content grid
+                    updateContentGrid({
+                        title: titleInput.value.trim(),
+                        timestamp: new Date().toISOString(),
+                        hash: result.hash,
+                        txUrl: txInfo.url
+                    });
+                    
+                    // Show success message
+                    messageElement.innerHTML = `
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                            <p class="font-bold">Success!</p>
+                            <p>Content uploaded and verified on blockchain</p>
+                            <p class="mt-2"><strong>Transaction ID:</strong> ${txInfo.txHash}</p>
+                        </div>
+                    `;
+
+                    // Reset form
+                    fileInput.value = '';
+                    titleInput.value = '';
+                    document.getElementById('creatorThumbnail').innerHTML = '<p class="text-gray-400">No file uploaded</p>';
+
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    messageElement.innerHTML = `
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                            <p class="font-bold">Error!</p>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                } finally {
+                    isUploading = false;
+                    uploadSpinner.classList.add('hidden');
+                    uploadButtonText.textContent = 'Upload Content';
+                    uploadButton.disabled = false;
+                }
+            }
+
+            function showCreatorThumbnail(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const thumbnailContainer = document.getElementById('creatorThumbnail');
+                thumbnailContainer.innerHTML = '';
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        thumbnailContainer.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview" class="max-h-32 max-w-full object-contain">
+                            <p class="mt-2 text-sm text-gray-500">${file.name}</p>
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.className = 'max-h-32 max-w-full object-contain';
+                    video.controls = true;
+                    thumbnailContainer.appendChild(video);
+                    thumbnailContainer.innerHTML += `<p class="mt-2 text-sm text-gray-500">${file.name}</p>`;
+                } else {
+                    thumbnailContainer.innerHTML = `
+                        <div class="p-4 bg-gray-100 rounded">
+                            <p class="text-gray-700">${file.name}</p>
+                            <p class="text-sm text-gray-500">${(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Make sure event listener is only attached once
+            function initializeCreatorHub() {
+                const uploadButton = document.getElementById('uploadButton');
+                if (uploadButton) {
+                    // Remove any existing event listeners
+                    uploadButton.replaceWith(uploadButton.cloneNode(true));
+                    
+                    // Get the fresh button reference
+                    const newUploadButton = document.getElementById('uploadButton');
+                    
+                    // Add the click event listener
+                    newUploadButton.addEventListener('click', uploadCreatorContent);
+                }
+            }
+
+            // Call this when the page loads
+            document.addEventListener('DOMContentLoaded', initializeCreatorHub);
+
+            // Add this function to handle mock login
+            function mockLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const walletAddress = document.getElementById('walletAddress').value;
+
+                if (!username || !password || !walletAddress) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                // Update the creator profile
+                document.getElementById('creatorInitials').textContent = username.charAt(0).toUpperCase();
+                document.getElementById('creatorDisplayName').textContent = 'DocuLink';
+                
+                // Show wallet address
+                const walletElement = document.getElementById('creatorWallet');
+                walletElement.classList.remove('hidden');
+                walletElement.querySelector('.wallet-text').textContent = walletAddress;
+                
+                // Hide login button
+                document.getElementById('loginButton').classList.add('hidden');
+
+                // Close modal
+                closeLoginModal();
+            }
+
+            // Add function to show login modal
+            function showLoginModal() {
+                const modal = document.getElementById('loginModal');
+                modal.classList.remove('hidden');
+            }
+
+            // Add function to close login modal
+            function closeLoginModal() {
+                const modal = document.getElementById('loginModal');
+                modal.classList.add('hidden');
+            }
+
+            // Add function to copy creator wallet
+            function copyCreatorWallet() {
+                const walletText = document.querySelector('#creatorWallet .wallet-text').textContent;
+                navigator.clipboard.writeText(walletText)
+                    .then(() => {
+                        // Show a temporary "Copied!" message
+                        const walletElement = document.getElementById('creatorWallet');
+                        const tempMessage = document.createElement('span');
+                        tempMessage.textContent = 'Copied!';
+                        tempMessage.className = 'text-green-500 text-sm ml-2';
+                        walletElement.appendChild(tempMessage);
+                        setTimeout(() => tempMessage.remove(), 2000);
+                    })
+                    .catch(err => console.error('Failed to copy wallet address:', err));
+            }
+        </script>
+    </div>
+</body>
+</html>
