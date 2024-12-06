@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, Response, send_from_directory
+from flask import Flask, request, jsonify, render_template, Response, send_from_directory, send_file
 import os
 import cv2
 import numpy as np
@@ -845,6 +845,17 @@ def get_verification_stats():
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/download-test-image')
+def download_test_image():
+    try:
+        return send_file('static/images/test-image.png',
+                        mimetype='image/png',
+                        as_attachment=True,
+                        download_name='test-image.png')
+    except Exception as e:
+        app.logger.error(f"Error serving test image: {e}")
+        return "Error serving test image", 500
 
 if __name__ == '__main__':
     # Create required directories if they don't exist
