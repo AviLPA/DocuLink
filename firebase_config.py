@@ -36,7 +36,7 @@ print("\nPrivate key verification:")
 pk = config.get("private_key", "")
 print(f"Starts with correct header: {pk.startswith('-----BEGIN PRIVATE KEY-----')}")
 print(f"Ends with correct footer: {pk.endswith('-----END PRIVATE KEY-----\n')}")
-print(f"Contains newlines: {'\\n' in pk}")
+print("Contains newlines:", "\n" in pk)
 
 try:
     # Parse the JSON string
