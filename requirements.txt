@@ -11,3 +11,4 @@ beautifulsoup4==4.12.3
 python-dotenv==1.0.1
 pycardano==0.10.0
 poppler-utils
+firebase-admin==6.4.0
