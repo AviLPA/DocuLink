@@ -884,6 +884,22 @@ def get_thumbnail(hash):
         # Return a default thumbnail or 404
         return send_file('static/default-thumbnail.png', mimetype='image/png')
 
+@app.route('/verify', methods=['POST'])
+def verify():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file uploaded'})
+    
+    file = request.files['file']
+    wallet_address = request.form.get('wallet_address')
+    
+    # Add your verification logic here
+    
+    return jsonify({
+        'success': True,
+        'message': 'Content verified successfully',
+        'txHash': 'your_transaction_hash_here'  # Replace with actual transaction hash
+    })
+
 if __name__ == '__main__':
     # Create required directories if they don't exist
     if not os.path.exists('uploads'):
