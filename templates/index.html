@@ -687,50 +687,112 @@
                 </div>
             </div>
 
-            <!-- Update the Authenticate section -->
+            <!-- Authentication Section -->
             <div class="section" id="authenticate">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Authenticate Your Content</h2>
-                        
-                        <!-- File Upload Area -->
-                        <div class="mb-6">
-                            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,application/pdf">
-                            <div id="dropArea" 
-                                 class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors">
-                                <div class="flex flex-col items-center justify-center space-y-4">
-                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
-                                        </path>
+                <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+                    <!-- Header -->
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900">Content Authentication</h2>
+                        <p class="mt-4 text-lg text-gray-600">Verify the authenticity of any digital content using blockchain technology</p>
+                    </div>
+
+                    <!-- Stats container -->
+                    <div class="stats-container grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Daily New Cases</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    <p class="text-gray-600">Click or drag files here to upload</p>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Data sourced from FBI's Internet Crime Complaint Center (IC3). 
+                                        Represents daily average of reported digital fraud cases.
+                                    </div>
                                 </div>
+                            </div>
+                            <p id="dailyCases" class="text-2xl font-bold text-red-600">Loading...</p>
+                        </div>
+
+                        <!-- Other stat boxes... -->
+                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-medium text-gray-500">Financial Impact</h3>
+                                <div class="group relative">
+                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
+                                        Annual financial losses reported to FTC and IC3.
+                                        Includes direct losses from digital fraud and content manipulation.
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="financialImpact" class="text-2xl font-bold text-red-600">Loading...</p>
+                        </div>
+
+                        <!-- Add the other two stat boxes back... -->
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Center Column: Upload and Verify -->
+                        <div class="lg:col-span-2">
+                            <div class="upload-container bg-white p-6 rounded-lg shadow-sm">
+                                <form id="uploadForm" class="space-y-4">
+                                    <div class="file-input-container">
+                                        <input type="file" 
+                                               id="fileInput" 
+                                               name="file" 
+                                               class="hidden"
+                                               accept="image/*,video/*,.pdf"
+                                               onchange="handleFileSelection(this)">
+                                        <label for="fileInput" 
+                                               class="cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                                            <div class="text-center">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-600">Click to upload or drag and drop</p>
+                                                <p class="mt-1 text-xs text-gray-500">Support for images, videos, and PDF documents</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div id="thumbnail" class="mt-4 flex justify-center">
+                                        <!-- Preview will be shown here -->
+                                    </div>
+
+                                    <div class="wallet-input">
+                                        <input type="text" 
+                                               id="walletInput" 
+                                               placeholder="Enter wallet address (optional)"
+                                               class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                                    </div>
+
+                                    <button type="button" 
+                                            onclick="verifyContent()"
+                                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                        Verify Content
+                                    </button>
+
+                                    <div id="verificationMessage" class="mt-4">
+                                        <!-- Results will be shown here -->
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
-                        <!-- Wallet Input (Auto-filled and hidden initially) -->
-                        <div id="walletInputArea" class="mb-6 hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Wallet Address</label>
-                            <input type="text" 
-                                   id="walletInput" 
-                                   value="addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd"
-                                   class="w-full p-3 border border-gray-300 rounded-md bg-gray-50" 
-                                   readonly>
-                        </div>
-
-                        <!-- Results Area -->
-                        <div id="resultsArea" class="hidden">
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Verification Results</h3>
-                                <div id="resultsContent" class="space-y-4 max-h-96 overflow-y-auto">
-                                    <!-- Results will be dynamically added here -->
+                        <!-- Right Column: Verification History -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Verifications</h3>
+                                <div id="verificationHistory" class="space-y-4">
+                                    <!-- Verification history will be dynamically added here -->
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Message Area -->
-                        <div id="message" class="mt-4"></div>
                     </div>
                 </div>
             </div>
