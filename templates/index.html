@@ -1416,11 +1416,11 @@
                     url: 'https://cardanoscan.io/transaction/176f3f2edbb6564f8d51c7073f3131ed7d0c98d60fc4f1255d476889274247d7'
                 };
             }
-            // For all other cases, generate a mock transaction
+            // For all other cases, generate a transaction link to mainnet explorer
             const mockTxHash = 'tx_' + Math.random().toString(36).substr(2, 9);
             return {
                 txHash: mockTxHash,
-                url: `https://preprod.cardanoscan.io/transaction/${mockTxHash}`
+                url: `https://cardanoscan.io/transaction/${mockTxHash}` // Changed from preprod to mainnet
             };
         }
 
@@ -1611,7 +1611,8 @@
         }
 
         function copyWallet() {
-            const walletAddress = "addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd";
+            // Update to mainnet address
+            const walletAddress = "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33";
             const copyMessage = document.getElementById('copyMessage');
             
             if (!copyMessage) {
@@ -1688,6 +1689,16 @@
                     <div class="flex-grow">
                         <h4 class="font-medium text-gray-900">${content.title}</h4>
                         <p class="text-sm text-gray-500">${new Date(content.timestamp).toLocaleString()}</p>
+                        <div class="mt-2 space-y-1">
+                            <p class="text-xs text-gray-600">
+                                <span class="font-medium">TX Hash:</span>
+                                <span class="font-mono">${content.txHash}</span>
+                            </p>
+                            <p class="text-xs text-gray-600">
+                                <span class="font-medium">Content Hash:</span>
+                                <span class="font-mono">${content.hash}</span>
+                            </p>
+                        </div>
                         <a href="${content.txUrl}" target="_blank" 
                            class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
                             View on Blockchain
@@ -1780,7 +1791,26 @@
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
                         <p class="font-bold">Success!</p>
                         <p>Content uploaded and verified on blockchain</p>
-                        <p class="mt-2"><strong>Transaction ID:</strong> ${txInfo.txHash}</p>
+                        <div class="mt-4 space-y-2">
+                            <div class="flex flex-col">
+                                <p class="font-semibold">Transaction Hash:</p>
+                                <p class="font-mono text-sm bg-gray-50 p-2 rounded break-all">${txInfo.txHash}</p>
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="font-semibold">Content Hash:</p>
+                                <p class="font-mono text-sm bg-gray-50 p-2 rounded break-all">${result.hash}</p>
+                            </div>
+                            <div class="mt-2">
+                                <a href="${txInfo.url}" 
+                                   target="_blank"
+                                   class="text-blue-600 hover:text-blue-800 underline inline-flex items-center">
+                                   <span>View on Blockchain</span>
+                                   <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                   </svg>
+                               </a>
+                            </div>
+                        </div>
                     </div>
                 `;
 
@@ -2229,7 +2259,7 @@
             // Auto-fill the wallet address
             const walletInput = document.getElementById('walletInput');
             if (walletInput) {
-                walletInput.value = "addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd";
+                walletInput.value = "addr1qxcuwgafcr4ahvawfgrdyc37508vxxh9ry8ys05nqx5r7ejhsp3ej007jmr3d6hj7dkwyupyam42yd4znlp9035auwrqg70try";
             }
         }
 
@@ -2243,7 +2273,6 @@
             const walletInput = document.getElementById('walletInput');
             const verificationMessage = document.getElementById('verificationMessage');
             
-            // Check if a file is selected
             if (!fileInput.files || fileInput.files.length === 0) {
                 verificationMessage.innerHTML = `
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -2253,20 +2282,27 @@
             }
 
             try {
-                // Show loading state
                 verificationMessage.innerHTML = `
                     <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-                        Verifying content...
+                        <p>Verifying content on blockchain...</p>
+                        <div class="mt-2">
+                            <div class="animate-pulse flex space-x-4">
+                                <div class="flex-1 space-y-4 py-1">
+                                    <div class="h-4 bg-blue-200 rounded w-3/4"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 bg-blue-200 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>`;
 
-                // Create form data
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
                 if (walletInput.value) {
                     formData.append('wallet_address', walletInput.value);
                 }
 
-                // Send verification request
                 const response = await fetch('/verify', {
                     method: 'POST',
                     body: formData
@@ -2288,19 +2324,31 @@
                             </div>
                             <div>
                                 <p class="font-medium">${fileInput.files[0].name}</p>
-                                <p class="text-sm text-gray-500">${new Date().toLocaleString()}</p>
-                                ${result.txHash ? `<a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=${result.txHash}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">View on Blockchain</a>` : ''}
+                                <p class="text-sm text-gray-500">Verified on: ${new Date(result.timestamp).toLocaleString()}</p>
+                                <p class="text-sm text-gray-500">Owner: ${result.owner}</p>
+                                <a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=${result.txHash}" 
+                                   target="_blank" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm">
+                                    View on Blockchain
+                                </a>
                             </div>
                         </div>
                     `;
                     historyDiv.prepend(newVerification);
 
-                    // Show success message
                     verificationMessage.innerHTML = `
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                            <p class="font-bold">Content Verified!</p>
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                            <p class="font-bold">Success!</p>
                             <p>${result.message}</p>
-                            ${result.txHash ? `<p class="mt-2"><a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=${result.txHash}" target="_blank" class="underline">View on Blockchain</a></p>` : ''}
+                            <p class="mt-2"><strong>Hash:</strong> ${result.hash}</p>
+                            <p><strong>Owner:</strong> ${result.owner}</p>
+                            <p class="mt-2">
+                                <a href="https://cardanoscan.io/transaction/${result.txHash}" 
+                                   target="_blank" 
+                                   class="text-blue-600 hover:text-blue-800 underline">
+                                    View Transaction on Explorer
+                                </a>
+                            </p>
                         </div>`;
                 } else {
                     throw new Error(result.message || 'Verification failed');
@@ -2309,8 +2357,9 @@
                 console.error('Verification error:', error);
                 verificationMessage.innerHTML = `
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        <p class="font-bold">Error!</p>
+                        <p class="font-bold">Verification Failed</p>
                         <p>${error.message}</p>
+                        <p class="mt-2 text-sm">This content either hasn't been registered on the blockchain or the wallet address doesn't match.</p>
                     </div>`;
             }
         }

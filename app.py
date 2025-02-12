@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import hashlib
 import requests
-from blockfrost import BlockFrostApi
+from blockfrost import BlockFrostApi, ApiError
 import sys
 import logging as python_logging
 import time
@@ -31,9 +31,22 @@ python_logging.basicConfig(level=python_logging.DEBUG)
 
 app = Flask(__name__)
 
-API_URL = "https://cardano-preview.blockfrost.io/api/v0"
-API_KEY = os.getenv('API_KEY', 'previewBiBg5iJOCfNTRlrajh8tTJ2WubfLE2VI')  # Your BlockFrost project ID
-WALLET_ADDRESS = "addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd"  # Your preview network wallet address
+# Replace the hardcoded API configuration with environment variables
+API_KEY = os.getenv('BLOCKFROST_API_KEY')
+NETWORK = os.getenv('CARDANO_NETWORK', 'mainnet')  # default to mainnet if not specified
+
+# Set API URL based on network
+if NETWORK == 'mainnet':
+    API_URL = "https://cardano-mainnet.blockfrost.io/api/v0"
+elif NETWORK == 'preprod':  # Changed from testnet to preprod
+    API_URL = "https://cardano-preprod.blockfrost.io/api/v0"
+elif NETWORK == 'preview':
+    API_URL = "https://cardano-preview.blockfrost.io/api/v0"
+else:
+    raise ValueError(f"Invalid CARDANO_NETWORK value: {NETWORK}")
+
+# Update the wallet address to use mainnet address
+WALLET_ADDRESS = "addr1qxcuwgafcr4ahvawfgrdyc37508vxxh9ry8ys05nqx5r7ejhsp3ej007jmr3d6hj7dkwyupyam42yd4znlp9035auwrqg70try"
 
 progress_data = {'processed_frames': 0, 'total_frames': 0}
 
@@ -87,6 +100,12 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(COMPARISON_FOLDER, exist_ok=True)
 
+# Load environment variables
+load_dotenv()
+
+# Initialize Blockfrost API
+BLOCKFROST_PROJECT_ID = os.getenv('BLOCKFROST_PROJECT_ID')
+
 def hash_binary_data(binary_data):
     try:
         python_logging.debug("Hashing binary data")
@@ -98,6 +117,9 @@ def hash_binary_data(binary_data):
         return ""
 
 def search_metadata_for_hash(wallet_address, hash_value):
+    # If no wallet address provided, use default mainnet address
+    if not wallet_address:
+        wallet_address = "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33"
     headers = {'project_id': API_KEY}
     page = 1
     while True:
@@ -324,7 +346,7 @@ def upload_file():
     python_logging.debug(f"Wallet address provided: {wallet}")
 
     # Determine which wallet to use
-    wallet_to_use = wallet if wallet else "addr1qyqmdurljd7v07rketnnc3udc9w547pya7v8jnh6zalrymyn84lfn88ypr4p6lvkaqwq46h2g67whtnenlpv2w9jvads3d458l"
+    wallet_to_use = wallet if wallet else "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33"
     python_logging.debug(f"Using wallet: {wallet_to_use}")
 
     if new_wallet and current_hash:
@@ -684,15 +706,15 @@ def upload_transaction():
             return jsonify({'success': False, 'message': 'Content hash is required'})
 
         # Use creator's wallet if provided, otherwise use default
-        wallet_to_use = creator_wallet if creator_wallet else WALLET_ADDRESS
+        wallet_to_use = creator_wallet if creator_wallet else "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33"
         python_logging.info(f"Using wallet address: {wallet_to_use}")
 
         # Initialize BlockFrost context
         try:
             context = BlockFrostChainContext(
                 project_id=API_KEY,
-                base_url="https://cardano-preview.blockfrost.io/api/v0",
-                network=Network.PREVIEW
+                base_url=API_URL,
+                network=Network.MAINNET
             )
             python_logging.info("BlockFrost context initialized successfully")
         except Exception as e:
@@ -889,16 +911,184 @@ def verify():
     if 'file' not in request.files:
         return jsonify({'success': False, 'message': 'No file uploaded'})
     
-    file = request.files['file']
-    wallet_address = request.form.get('wallet_address')
-    
-    # Add your verification logic here
-    
-    return jsonify({
-        'success': True,
-        'message': 'Content verified successfully',
-        'txHash': 'your_transaction_hash_here'  # Replace with actual transaction hash
-    })
+    try:
+        file = request.files['file']
+        # Use the new wallet address as default if none provided
+        wallet_address = request.form.get('wallet_address', 
+            "addr1qxcuwgafcr4ahvawfgrdyc37508vxxh9ry8ys05nqx5r7ejhsp3ej007jmr3d6hj7dkwyupyam42yd4znlp9035auwrqg70try")
+        
+        # Debug logging
+        print(f"Verifying file: {file.filename}")
+        print(f"Wallet address: {wallet_address}")
+        
+        # Save file temporarily
+        file_path = os.path.join('uploads', file.filename)
+        file.save(file_path)
+        
+        try:
+            if file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                binary_code = image_to_binary(Image.open(file_path))
+            elif file.filename.lower().endswith(('.mp4', '.mov')):
+                binary_code = video_to_binary(file_path)
+            elif file.filename.lower().endswith('.pdf'):
+                binary_code = pdf_to_binary(file_path)
+            else:
+                return jsonify({'success': False, 'message': 'Unsupported file type'})
+            
+            file_hash = hash_binary_data(binary_code)
+            print(f"Generated file hash: {file_hash}")
+            
+            blockchain_result = query_blockchain(file_hash, wallet_address)
+            print(f"Blockchain result: {blockchain_result}")
+            
+            if blockchain_result['found']:
+                return jsonify({
+                    'success': True,
+                    'message': 'Content verified on blockchain!',
+                    'txHash': blockchain_result['txHash'],
+                    'owner': blockchain_result['owner']  # Removed timestamp
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Content not found on blockchain',
+                    'details': 'This content has not been registered or the wallet address does not match'
+                })
+                
+        finally:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            
+    except Exception as e:
+        print(f"Verification error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Verification failed',
+            'error': str(e)
+        })
+
+def query_blockchain(file_hash, wallet_address=None):
+    if not wallet_address:
+        wallet_address = "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33"
+    try:
+        api = BlockFrostApi(
+            project_id=API_KEY
+        )
+        
+        print(f"Querying transactions for wallet: {wallet_address}")
+        print(f"Looking for hash: {file_hash}")  # Add this line
+        
+        try:
+            transactions = api.address_transactions(
+                address=wallet_address,
+                count=100
+            )
+            
+            for tx in transactions:
+                try:
+                    metadata = api.transaction_metadata(
+                        hash=tx.tx_hash
+                    )
+                    
+                    print(f"\nChecking transaction {tx.tx_hash} metadata:")
+                    print(f"Metadata: {metadata}")
+                    
+                    for meta in metadata:
+                        print(f"Checking metadata entry: {meta}")
+                        
+                        if hasattr(meta, 'json_metadata'):
+                            json_meta = meta.json_metadata
+                            print(f"JSON metadata: {json_meta}")
+                            
+                            # Convert Namespace to dict if needed
+                            if hasattr(json_meta, '__dict__'):
+                                json_dict = vars(json_meta)
+                            else:
+                                json_dict = json_meta
+                                
+                            print(f"Converted to dict: {json_dict}")
+                            
+                            # Check msg list first (most common case)
+                            if 'msg' in json_dict and isinstance(json_dict['msg'], list):
+                                print(f"Checking msg list: {json_dict['msg']}")
+                                print(f"File hash to match: {file_hash}")
+                                for item in json_dict['msg']:
+                                    print(f"Comparing with item: {item}")
+                                    print(f"Types - item: {type(item)}, file_hash: {type(file_hash)}")
+                                    print(f"Lengths - item: {len(item)}, file_hash: {len(file_hash)}")
+                                    print(f"Are they equal? {item.lower() == file_hash.lower()}")
+                                    if item.lower() == file_hash.lower():  # Case-insensitive comparison
+                                        print(f"Found matching hash in msg list: {file_hash}")
+                                        return {
+                                            'found': True,
+                                            'txHash': tx.tx_hash,
+                                            'timestamp': tx.block_time,
+                                            'owner': wallet_address,
+                                            'metadata': json_dict
+                                        }
+                            
+                            # Check direct match in the entire dict
+                            dict_str = str(json_dict).lower()
+                            if file_hash.lower() in dict_str:
+                                print(f"Found matching hash in metadata: {file_hash}")
+                                return {
+                                    'found': True,
+                                    'txHash': tx.tx_hash,
+                                    'timestamp': tx.block_time,
+                                    'owner': wallet_address,
+                                    'metadata': json_dict
+                                }
+                            
+                            # Check nested dictionaries
+                            for value in json_dict.values():
+                                if isinstance(value, dict):
+                                    value_str = str(value).lower()
+                                    if file_hash.lower() in value_str:
+                                        print(f"Found matching hash in nested dict: {file_hash}")
+                                        return {
+                                            'found': True,
+                                            'txHash': tx.tx_hash,
+                                            'timestamp': tx.block_time,
+                                            'owner': wallet_address,
+                                            'metadata': json_dict
+                                        }
+                
+                except Exception as tx_error:
+                    print(f"Error processing transaction {tx.tx_hash}: {str(tx_error)}")
+                    continue
+            
+            print("No matching hash found in transactions")
+            return {'found': False}
+            
+        except ApiError as e:
+            if e.status_code == 404:
+                print(f"No transactions found for address {wallet_address}")
+                return {'found': False}
+            raise
+            
+    except Exception as e:
+        print(f"Error querying blockchain: {e}")
+        raise Exception(f"Blockchain query failed: {e}")
+
+def verify_api_key():
+    try:
+        api = BlockFrostApi(
+            project_id=API_KEY
+        )
+        # Try to get the latest block as a simple test
+        latest_block = api.block_latest()
+        print(f"API connection successful. Latest block: {latest_block.hash}")
+        return True
+    except Exception as e:
+        print(f"API connection failed: {str(e)}")
+        if isinstance(e, ApiError):
+            print(f"Status code: {e.status_code}")
+            print(f"Response: {e.response}")
+        return False
+
+# Add this near your app initialization
+if not verify_api_key():
+    print("Warning: Unable to verify Blockfrost API key")
 
 if __name__ == '__main__':
     # Create required directories if they don't exist
