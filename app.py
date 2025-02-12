@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, Response, send_from_directory, send_file
+from flask import Flask, request, jsonify, render_template, Response, send_from_directory, send_file, session
 import os
 import cv2
 import numpy as np
@@ -17,6 +17,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 from datetime import datetime
 import random
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
+from firebase_config import db
 try:
     from dotenv import load_dotenv
     load_dotenv()  # Load environment variables from .env file
@@ -856,6 +859,30 @@ def download_test_image():
     except Exception as e:
         app.logger.error(f"Error serving test image: {e}")
         return "Error serving test image", 500
+
+@app.route('/verify_token', methods=['POST'])
+def verify_token():
+    try:
+        # Get the ID token from the request
+        id_token = request.json['idToken']
+        
+        # Verify the token
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+        
+        return jsonify({'success': True, 'uid': uid})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 401
+
+@app.route('/get_thumbnail/<hash>')
+def get_thumbnail(hash):
+    # Get the file path from your storage
+    file_path = f"uploads/{hash}"  # Adjust path as needed
+    if os.path.exists(file_path):
+        return send_file(file_path, mimetype='image/jpeg')
+    else:
+        # Return a default thumbnail or 404
+        return send_file('static/default-thumbnail.png', mimetype='image/png')
 
 if __name__ == '__main__':
     # Create required directories if they don't exist

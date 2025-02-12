@@ -245,7 +245,101 @@
         .copy-message.visible {
             opacity: 1;
         }
+
+        /* RTL support */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .rtl .nav-button {
+            margin-left: 0;
+            margin-right: 1rem;
+        }
+        
+        /* Add any additional RTL-specific styles as needed */
     </style>
+
+    <!-- Update the Firebase scripts to use the newer version -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+
+    <!-- Initialize Firebase -->
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJvx77AHbDVqDLbdSwnTV9NfJ_AK5a78k",
+            authDomain: "doculink-4db99.firebaseapp.com",
+            projectId: "doculink-4db99",
+            storageBucket: "doculink-4db99.firebasestorage.app",
+            messagingSenderId: "640892607603",
+            appId: "1:640892607603:web:a584f327233992a7485e06",
+            measurementId: "G-C7TE937NLN"
+        };
+
+        // Initialize Firebase with better error handling
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            window.auth = firebase.auth();
+            window.db = firebase.firestore();
+            window.analytics = firebase.analytics();
+
+            // Add auth state observer
+            auth.onAuthStateChanged((user) => {
+                console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+                if (user) {
+                    updateUIForUser(user);
+                }
+            }, (error) => {
+                console.error('Auth state observer error:', error);
+                showError('Authentication error: ' + error.message);
+            });
+
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            showError('Failed to initialize Firebase: ' + error.message);
+        }
+
+        // Update handleAuth function to use popup instead of redirect
+        async function handleAuth(type) {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                let result;
+                if (type === 'signup') {
+                    result = await auth.signInWithPopup(provider);
+                } else {
+                    result = await auth.signInWithPopup(provider);
+                }
+                
+                if (result.user) {
+                    console.log('Authentication successful:', result.user);
+                    closeAuthModal();
+                    updateUIForUser(result.user);
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showError(error.message || 'Authentication failed');
+            }
+        }
+
+        // Helper function to show errors
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded';
+            errorDiv.innerHTML = `
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline"> ${message}</span>
+            `;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+    </script>
 </head>
 <body>
     <div class="relative flex size-full min-h-screen flex-col bg-[#FFFFFF] justify-between group/design-root overflow-x-hidden">
@@ -257,7 +351,6 @@
                         <div class="flex items-center">
                             <img src="{{url_for('static', filename='chainicon.png')}}" alt="DocuLink Logo" class="w-8 h-8 mr-2">
                             <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">DocuLink</span>
-                            <!-- Update test image download button -->
                             <a href="/download-test-image" 
                                class="ml-4 px-3 py-1 text-sm text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-md transition-all duration-300 shadow-sm hover:shadow-md">
                                 Download Test Image
@@ -265,28 +358,33 @@
                         </div>
                         
                         <!-- Navigation -->
-                        <div class="flex space-x-8 items-center z-50 relative">
-                            <button type="button" 
-                                    class="nav-button cursor-pointer text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-all duration-300"
-                                    data-section="home">
-                                Home
-                            </button>
-                            <button type="button" 
-                                    class="nav-button cursor-pointer text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-all duration-300"
-                                    data-section="authenticate">
-                                Authenticate
-                            </button>
-                            <button type="button" 
-                                    class="nav-button cursor-pointer text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-blue-600 transition-all duration-300"
-                                    data-section="creatorHub">
-                                Creator's Hub
-                            </button>
-                            <button type="button" 
-                                    class="nav-button cursor-pointer bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                                    data-section="comingSoon">
-                                Coming Soon
-                            </button>
-                            <div class="wallet-section inline-flex items-center">
+                        <div class="flex items-center space-x-4">
+                            <!-- Navigation Buttons -->
+                            <nav class="hidden md:flex space-x-4">
+                                <button type="button" 
+                                        class="nav-button text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                                        data-section="home">
+                                    Home
+                                </button>
+                                <button type="button" 
+                                        class="nav-button text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                                        data-section="authenticate">
+                                    Authenticate
+                                </button>
+                                <button type="button" 
+                                        class="nav-button text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                                        data-section="creatorHub">
+                                    Creator's Hub
+                                </button>
+                                <button type="button" 
+                                        class="nav-button bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                                        data-section="comingSoon">
+                                    Coming Soon
+                                </button>
+                            </nav>
+
+                            <!-- Wallet Section -->
+                            <div class="wallet-section flex items-center">
                                 <button type="button" 
                                         id="copyWalletBtn"
                                         class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-md hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-sm hover:shadow-md">
@@ -297,15 +395,24 @@
                                 </button>
                                 <span id="copyMessage" class="copy-message ml-2" role="status"></span>
                             </div>
-                        </div>
 
-                        <!-- Developer Tools Button -->
-                        <button onclick="toggleDevTools()" class="text-sm text-gray-500 hover:text-gray-700">
-                            <span class="sr-only">Developer Tools</span>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            </svg>
-                        </button>
+                            <!-- User Section (shown when logged in) -->
+                            <div id="userSection" class="hidden flex items-center space-x-4">
+                                <span id="userEmail" class="text-sm text-gray-600"></span>
+                                <button onclick="handleSignOut()" 
+                                        class="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium">
+                                    Logout
+                                </button>
+                            </div>
+
+                            <!-- Login Button (shown when logged out) -->
+                            <button type="button" 
+                                    id="loginButton"
+                                    onclick="showAuthModal(event)"
+                                    class="nav-button bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-sm hover:shadow-md">
+                                Login / Sign Up
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -319,8 +426,7 @@
                             <main class="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                                 <div class="sm:text-center lg:text-left">
                                     <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-                                        <span class="block">Secure Your Digital</span>
-                                        <span class="block text-blue-600">Content Forever</span>
+                                        <span class="block" data-translate="secureContent">Secure Your Digital Content Forever</span>
                                     </h1>
                                     <p class="mt-3 text-base text-gray-500 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
                                         DocuLink provides immutable proof of authenticity for your digital content using Cardano blockchain technology. Protect your intellectual property and verify content integrity with ease.
@@ -581,146 +687,50 @@
                 </div>
             </div>
 
-            <!-- Authentication Section -->
+            <!-- Update the Authenticate section -->
             <div class="section" id="authenticate">
-                <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-                    <!-- Header -->
-                    <div class="text-center mb-12">
-                        <h2 class="text-3xl font-bold text-gray-900">Content Authentication</h2>
-                        <p class="mt-4 text-lg text-gray-600">Verify the authenticity of any digital content using blockchain technology</p>
-                    </div>
-
-                    <!-- Replace the stats container in the authenticate section -->
-                    <div class="stats-container grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-medium text-gray-500">Daily New Cases</h3>
-                                <div class="group relative">
-                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
-                                        Data sourced from FBI's Internet Crime Complaint Center (IC3). 
-                                        Represents daily average of reported digital fraud cases.
-                                    </div>
-                                </div>
-                            </div>
-                            <p id="dailyCases" class="text-2xl font-bold text-red-600">Loading...</p>
-                        </div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Authenticate Your Content</h2>
                         
-                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-medium text-gray-500">Financial Impact</h3>
-                                <div class="group relative">
-                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <!-- File Upload Area -->
+                        <div class="mb-6">
+                            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,application/pdf">
+                            <div id="dropArea" 
+                                 class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors">
+                                <div class="flex flex-col items-center justify-center space-y-4">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                                        </path>
                                     </svg>
-                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
-                                        Annual financial losses reported to FTC and IC3.
-                                        Includes direct losses from digital fraud and content manipulation.
-                                    </div>
-                                </div>
-                            </div>
-                            <p id="financialImpact" class="text-2xl font-bold text-red-600">Loading...</p>
-                        </div>
-                        
-                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-medium text-gray-500">Deepfake Increase</h3>
-                                <div class="group relative">
-                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
-                                        Year-over-year increase in detected deepfake content.
-                                        Based on research from digital forensics organizations.
-                                    </div>
-                                </div>
-                            </div>
-                            <p id="deepfakeIncrease" class="text-2xl font-bold text-red-600">Loading...</p>
-                        </div>
-                        
-                        <div class="stat-box bg-white p-4 rounded-lg shadow-sm">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-medium text-gray-500">Protected Content</h3>
-                                <div class="group relative">
-                                    <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div class="hidden group-hover:block absolute z-10 w-64 p-2 bg-black text-white text-xs rounded shadow-lg -mt-1 ml-6">
-                                        Total number of files protected by DocuLink.
-                                        Includes verified and blockchain-registered content.
-                                    </div>
-                                </div>
-                            </div>
-                            <p id="totalVerifications" class="text-2xl font-bold text-green-600">0</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <!-- Center Column: Upload and Verify -->
-                        <div class="lg:col-span-2">
-                            <div class="upload-container bg-white p-6 rounded-lg shadow-sm">
-                                <form id="uploadForm" class="space-y-4">
-                                    <div class="file-input-container">
-                                        <input type="file" 
-                                               id="fileInput" 
-                                               name="file" 
-                                               class="hidden"
-                                               accept="image/*,video/*,.pdf"
-                                               onchange="showThumbnail(this)">
-                                        <label for="fileInput" 
-                                               class="cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
-                                            <div class="text-center">
-                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
-                                                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                <p class="mt-2 text-sm text-gray-600">Click to upload or drag and drop</p>
-                                                <p class="mt-1 text-xs text-gray-500">Support for images, videos, and PDF documents</p>
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <div id="thumbnail" class="mt-4 flex justify-center">
-                                        <!-- Preview will be shown here -->
-                                    </div>
-
-                                    <div class="wallet-input">
-                                        <input type="text" 
-                                               id="walletInput" 
-                                               placeholder="Enter wallet address (optional)"
-                                               class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                    </div>
-
-                                    <button type="button" 
-                                            onclick="uploadFile()"
-                                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                                        Verify Content
-                                    </button>
-
-                                    <div id="uploadProgress" class="hidden">
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div id="uploadProgressBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <div id="uploadMessage" class="mt-4">
-                                        <!-- Results will be shown here -->
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: Verification History -->
-                        <div class="mt-8 lg:col-span-1">
-                            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Verifications</h3>
-                                <div id="verificationHistory" class="space-y-4">
-                                    <!-- Verification history will be dynamically added here -->
+                                    <p class="text-gray-600">Click or drag files here to upload</p>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Wallet Input (Auto-filled and hidden initially) -->
+                        <div id="walletInputArea" class="mb-6 hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Wallet Address</label>
+                            <input type="text" 
+                                   id="walletInput" 
+                                   value="addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd"
+                                   class="w-full p-3 border border-gray-300 rounded-md bg-gray-50" 
+                                   readonly>
+                        </div>
+
+                        <!-- Results Area -->
+                        <div id="resultsArea" class="hidden">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Verification Results</h3>
+                                <div id="resultsContent" class="space-y-4 max-h-96 overflow-y-auto">
+                                    <!-- Results will be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Area -->
+                        <div id="message" class="mt-4"></div>
                     </div>
                 </div>
             </div>
@@ -794,182 +804,96 @@
                 </div>
             </div>
 
-            <!-- Creator's Hub Section -->
+            <!-- Update the Creator's Hub section -->
             <div class="section" id="creatorHub">
-                <!-- Mock Login Modal -->
-                <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-                    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                        <h2 class="text-2xl font-bold mb-4">Welcome Back Creator</h2>
-                        <form id="loginForm" class="space-y-4">
-                            <div>
-                                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                                <input type="text" id="username" placeholder="Username" 
-                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" id="password" placeholder="Password" 
-                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="walletAddress" class="block text-sm font-medium text-gray-700">Wallet Address</label>
-                                <input type="text" id="walletAddress" placeholder="Enter your Cardano wallet address" 
-                                       class="w-full p-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500" required>
-                            </div>
-                            <button type="button" onclick="mockLogin()" 
-                                    class="w-full bg-[#359EFF] text-white py-2 rounded-lg hover:bg-blue-600">Login</button>
-                            <button type="button" onclick="closeLoginModal()" 
-                                    class="w-full mt-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                        </form>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <!-- Creator Status Bar -->
+                    <div class="flex items-center justify-between mb-8 bg-white p-4 rounded-lg shadow">
+                        <div class="flex items-center space-x-4">
+                            <span class="creator-status text-gray-500">Guest Creator</span>
+                            <button class="creator-login-button px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" 
+                                    onclick="showAuthModal(event)">
+                                Login
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Main Content -->
-                <div class="flex h-[calc(100vh-120px)] overflow-hidden">
-                    <!-- Left Column: Creator Profile & Upload -->
-                    <div class="w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
-                        <!-- Creator Profile -->
-                        <div class="flex items-center mb-6">
-                            <div id="creatorProfile" class="flex items-center space-x-4">
-                                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span id="creatorInitials" class="text-2xl font-bold text-gray-600">?</span>
-                                </div>
-                                <div>
-                                    <h2 id="creatorDisplayName" class="text-xl font-bold">Guest Creator</h2>
-                                    <p id="creatorWallet" class="text-sm text-gray-500 hidden">
-                                        <span class="wallet-text truncate"></span>
-                                        <button onclick="copyCreatorWallet()" class="ml-2 text-blue-500 hover:text-blue-700">
-                                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                            </svg>
+                    <!-- Upload Section (hidden by default) -->
+                    <div class="upload-section hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                            <!-- Upload Form - Takes 3 columns -->
+                            <div class="lg:col-span-3">
+                                <div class="bg-white p-6 rounded-lg shadow-lg">
+                                    <h3 class="text-xl font-semibold mb-6">Upload New Content</h3>
+                                    <form id="creatorForm" enctype="multipart/form-data" class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Content Title</label>
+                                            <input type="text" id="contentTitle" name="title" 
+                                                   class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                                   placeholder="Enter title for your content" required>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                            <textarea id="contentDescription" name="description" 
+                                                      class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                                      rows="3" placeholder="Describe your content"></textarea>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <input type="file" id="listFileInput" name="file" 
+                                                   accept="video/mp4,video/quicktime,image/png,image/jpeg,application/pdf" 
+                                                   class="hidden" onchange="showCreatorThumbnail(this)">
+                                            <label for="listFileInput" 
+                                                   class="flex cursor-pointer items-center justify-center overflow-hidden rounded-md h-12 px-5 bg-gray-50 text-gray-700 border-2 border-dashed border-gray-300 hover:bg-gray-100 transition-colors">
+                                                <span class="truncate">Choose File</span>
+                                            </label>
+                                            <div id="creatorThumbnail" 
+                                                 class="mt-2 w-full h-40 border border-gray-200 rounded-md flex items-center justify-center bg-gray-50">
+                                                <p class="text-gray-400">No file uploaded</p>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" 
+                                                id="uploadButton"
+                                                onclick="uploadCreatorContent()"
+                                                class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                            <span id="uploadButtonText">Upload Content</span>
+                                            <span id="uploadSpinner" class="hidden inline-block animate-spin ml-2">⚪</span>
                                         </button>
-                                    </p>
-                                    <button onclick="showLoginModal()" class="text-sm text-blue-500 hover:text-blue-700" id="loginButton">Login</button>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Creator Stats -->
-                        <div class="grid grid-cols-3 gap-4 mb-6">
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <div id="uploadCount" class="text-2xl font-bold text-blue-600">0</div>
-                                <div class="text-sm text-gray-600">Uploads</div>
+                                        <div id="uploadProgress" class="mt-4 hidden">
+                                            <div class="flex justify-between mb-1">
+                                                <span class="text-sm font-medium text-blue-700">Uploading...</span>
+                                                <span id="uploadPercentage" class="text-sm font-medium text-blue-700">0%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div id="uploadProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        <div id="listMessage" class="mt-4 hidden"></div>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <div id="totalSize" class="text-2xl font-bold text-blue-600">0</div>
-                                <div class="text-sm text-gray-600">MB Used</div>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <div id="lastUpload" class="text-2xl font-bold text-blue-600">-</div>
-                                <div class="text-sm text-gray-600">Last Upload</div>
-                            </div>
-                        </div>
 
-                        <!-- Add this before the upload form -->
-                        <div class="mb-8">
-                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-xl font-bold">Premium Creator Account</h3>
-                                        <p class="text-blue-100 mt-1">Unlock advanced features and higher storage limits</p>
-                                    </div>
-                                    <button class="bg-white text-blue-600 px-4 py-2 rounded-md font-semibold hover:bg-blue-50 transition-colors">
-                                        Upgrade Now
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Upload Form -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-xl font-semibold mb-4">New Upload</h2>
-                            <form id="creatorForm" enctype="multipart/form-data" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Content Title</label>
-                                    <input type="text" id="contentTitle" name="title" 
-                                           class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                           placeholder="Enter title for your content" required>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-                                    <input type="text" id="contentTags" name="tags" 
-                                           class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                           placeholder="Add tags (comma separated)">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                    <textarea id="contentDescription" name="description" 
-                                              class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                              rows="3" placeholder="Describe your content"></textarea>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <input type="file" id="listFileInput" name="file" 
-                                           accept="video/mp4,video/quicktime,image/png,image/jpeg,application/pdf" 
-                                           class="hidden" onchange="showCreatorThumbnail(this)">
-                                    <label for="listFileInput" 
-                                           class="flex cursor-pointer items-center justify-center overflow-hidden rounded-md h-12 px-5 bg-gray-50 text-gray-700 border-2 border-dashed border-gray-300 hover:bg-gray-100 transition-colors">
-                                        <span class="truncate">Choose File</span>
-                                    </label>
-                                    <div id="creatorThumbnail" 
-                                         class="mt-2 w-full h-40 border border-gray-200 rounded-md flex items-center justify-center bg-gray-50">
-                                        <p class="text-gray-400">No file uploaded</p>
+                            <!-- Stats Card - Takes 1 column -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white p-6 rounded-lg shadow-lg">
+                                    <h3 class="text-lg font-semibold mb-4">Your Stats</h3>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div id="uploadCount" class="text-2xl font-bold text-blue-600">0</div>
+                                        <div class="text-sm text-gray-600">Total Uploads</div>
                                     </div>
                                 </div>
 
-                                <button type="button" 
-                                        id="uploadButton"
-                                        class="w-full bg-[#359EFF] text-white font-bold py-3 px-4 rounded-md hover:bg-blue-600 transition-colors">
-                                    <span id="uploadButtonText">Upload Content</span>
-                                    <span id="uploadSpinner" class="hidden inline-block animate-spin ml-2">⚪</span>
-                                </button>
-
-                                <!-- Add the progress bar and message box here -->
-                                <div id="uploadProgress" class="mt-4 hidden">
-                                    <div class="flex justify-between mb-1">
-                                        <span class="text-sm font-medium text-blue-700">Uploading...</span>
-                                        <span id="uploadPercentage" class="text-sm font-medium text-blue-700">0%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div id="uploadProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                <!-- Your Content Section -->
+                                <div class="mt-6 bg-white p-6 rounded-lg shadow-lg">
+                                    <h3 class="text-lg font-semibold mb-4">Your Content</h3>
+                                    <div id="contentGrid" class="space-y-4">
+                                        <!-- Content items will be dynamically added here -->
                                     </div>
                                 </div>
-                                <div id="listMessage" class="mt-4 hidden"></div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Content Library -->
-                    <div class="w-1/2 p-6 overflow-y-auto">
-                        <!-- Add this before the content grid -->
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-xl font-semibold">Your Content Library</h2>
-                            <div class="flex space-x-4">
-                                <div class="relative">
-                                    <input type="text" placeholder="Search content..." 
-                                           class="pl-10 pr-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
-                                <select class="border rounded-md px-3 py-2 text-sm bg-white">
-                                    <option>All Types</option>
-                                    <option>Images</option>
-                                    <option>Videos</option>
-                                    <option>Documents</option>
-                                </select>
-                                <button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
-                                    Bulk Upload
-                                </button>
                             </div>
-                        </div>
-
-                        <!-- Content Grid -->
-                        <div id="contentGrid" class="grid grid-cols-1 gap-4">
-                            <!-- Content items will be dynamically added here -->
                         </div>
                     </div>
                 </div>
@@ -1157,6 +1081,47 @@
             </div>
         </div>
     </div>
+    <!-- Add this after your existing modals -->
+    <div id="authModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex flex-col space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-900" id="authTitle">Login to DocuLink</h3>
+                    <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Auth Form -->
+                <form id="authForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="authEmail" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="authPassword" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex flex-col space-y-2">
+                        <button type="button" onclick="handleAuth('login')"
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Login
+                        </button>
+                        <button type="button" onclick="handleAuth('signup')"
+                                class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                            Sign Up
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
         // Global variables
         let statsInterval;
@@ -1185,6 +1150,12 @@
             
             initializeOtherHandlers();
             initializeDragAndDrop();
+            
+            // Load saved language preference
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang) {
+                switchLanguage(savedLang);
+            }
         });
 
         function initializeNavigation() {
@@ -1623,40 +1594,47 @@
             }
         }
 
-        // Simplify updateContentGrid function
-        function updateContentGrid(newContent) {
+        // Update the updateContentGrid function to include thumbnails
+        function updateContentGrid(content) {
             const contentGrid = document.getElementById('contentGrid');
-            if (!contentGrid) return;
-
-            // Create a new content card element
-            const contentCard = document.createElement('div');
-            contentCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'bg-gray-50 p-4 rounded-lg hover:shadow-md transition-shadow';
             
-            // Set the content
-            contentCard.innerHTML = `
-                <div class="p-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                            ${getFileTypeIcon(newContent.title)}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-lg font-semibold text-gray-900 truncate">${newContent.title}</h3>
-                            <p class="text-sm text-gray-500">${new Date(newContent.timestamp).toLocaleString()}</p>
-                        </div>
+            // Get file extension from hash or title to determine icon
+            const fileType = content.fileName ? content.fileName.split('.').pop().toLowerCase() : 'unknown';
+            
+            // Choose icon based on file type
+            let iconSvg = '';
+            if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                // Show thumbnail for images
+                iconSvg = `<img src="/get_thumbnail/${content.hash}" alt="${content.title}" class="w-12 h-12 object-cover rounded">`;
+            } else if (['pdf'].includes(fileType)) {
+                iconSvg = `<svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        </svg>`;
+            } else {
+                iconSvg = `<svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>`;
+            }
+
+            itemDiv.innerHTML = `
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        ${iconSvg}
                     </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-600 truncate">Hash: ${newContent.hash}</p>
-                        <a href="${newContent.txUrl}" 
-                           target="_blank" 
-                           class="text-sm text-blue-600 hover:text-blue-800 underline">
+                    <div class="flex-grow">
+                        <h4 class="font-medium text-gray-900">${content.title}</h4>
+                        <p class="text-sm text-gray-500">${new Date(content.timestamp).toLocaleString()}</p>
+                        <a href="${content.txUrl}" target="_blank" 
+                           class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
                             View on Blockchain
                         </a>
                     </div>
                 </div>
             `;
-
-            // Add the new card at the beginning
-            contentGrid.insertBefore(contentCard, contentGrid.firstChild);
+            
+            contentGrid.prepend(itemDiv);
         }
 
         // Add a flag to prevent double execution
@@ -1664,21 +1642,25 @@
 
         // Modify uploadCreatorContent function
         async function uploadCreatorContent() {
-            if (isUploading) {
-                console.log('Upload already in progress');
+            if (isUploading) return;
+
+            // Get current user first
+            const user = auth.currentUser;
+            if (!user) {
+                showError('Please log in to upload content');
                 return;
             }
 
             const fileInput = document.getElementById('listFileInput');
             const titleInput = document.getElementById('contentTitle');
+            const descriptionInput = document.getElementById('contentDescription');
             const messageElement = document.getElementById('listMessage');
             const uploadButton = document.getElementById('uploadButton');
             const uploadSpinner = document.getElementById('uploadSpinner');
             const uploadButtonText = document.getElementById('uploadButtonText');
             
-            // Basic validation
             if (!fileInput.files[0] || !titleInput.value.trim()) {
-                alert('Please select a file and enter a title');
+                showError('Please select a file and enter a title');
                 return;
             }
 
@@ -1689,14 +1671,11 @@
                 uploadButtonText.textContent = 'Uploading...';
                 uploadButton.disabled = true;
                 
-                // Show loading state
-                messageElement.innerHTML = '<p class="text-blue-600">Processing upload...</p>';
-                
-                // Create FormData
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
                 formData.append('title', titleInput.value.trim());
-                
+                formData.append('description', descriptionInput.value.trim());
+
                 // Upload file
                 const response = await fetch('/creator_hub', {
                     method: 'POST',
@@ -1710,14 +1689,30 @@
                 // Get transaction info
                 const txInfo = getTransactionLink(result.hash);
                 
+                // Save to Firestore
+                await db.collection('users')
+                    .doc(user.uid)
+                    .collection('documents')
+                    .add({
+                        title: titleInput.value.trim(),
+                        description: descriptionInput.value.trim(),
+                        hash: result.hash,
+                        txUrl: txInfo.url,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        fileName: fileInput.files[0].name,
+                        fileType: fileInput.files[0].type
+                    });
+
                 // Update content grid
                 updateContentGrid({
                     title: titleInput.value.trim(),
-                    timestamp: new Date().toISOString(),
+                    timestamp: new Date(),
                     hash: result.hash,
-                    txUrl: txInfo.url
+                    txUrl: txInfo.url,
+                    fileName: fileInput.files[0].name,
+                    fileType: fileInput.files[0].type
                 });
-                
+
                 // Show success message
                 messageElement.innerHTML = `
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -1730,7 +1725,11 @@
                 // Reset form
                 fileInput.value = '';
                 titleInput.value = '';
+                descriptionInput.value = '';
                 document.getElementById('creatorThumbnail').innerHTML = '<p class="text-gray-400">No file uploaded</p>';
+
+                // Update stats
+                await updateUserStats(user.uid);
 
             } catch (error) {
                 console.error('Upload error:', error);
@@ -1853,6 +1852,329 @@
                 })
                 .catch(err => console.error('Failed to copy wallet address:', err));
         }
+
+        // Add these functions to your existing script section
+        
+        async function handleAuth(type) {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) {
+                showError('Please enter both email and password');
+                return;
+            }
+
+            try {
+                let userCredential;
+                if (type === 'signup') {
+                    userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                } else {
+                    userCredential = await auth.signInWithEmailAndPassword(email, password);
+                }
+
+                const user = userCredential.user;
+                console.log('Authentication successful:', user);
+                
+                // Close the modal and update UI
+                closeAuthModal();
+                updateUIForUser(user);
+
+            } catch (error) {
+                console.error('Authentication error:', error);
+                showError(error.message || 'Authentication failed');
+            }
+        }
+
+        function updateUIForUser(user) {
+            // Hide login button
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) loginButton.classList.add('hidden');
+            
+            // Show user section
+            const userSection = document.getElementById('userSection');
+            if (userSection) {
+                userSection.classList.remove('hidden');
+                const userEmail = document.getElementById('userEmail');
+                if (userEmail) userEmail.textContent = user.email;
+            }
+            
+            // Load user's content in Creator's Hub
+            loadUserContent(user.uid);
+            
+            // Update Creator's Hub UI
+            updateCreatorHubUI(user);
+            
+            // Update Creator's Hub UI and switch to it
+            const creatorHub = document.querySelector('[data-section="creatorHub"]');
+            if (creatorHub) {
+                creatorHub.classList.add('text-blue-600');
+                showSection('creatorHub');
+            }
+        }
+
+        // Update the auth state change listener
+        auth.onAuthStateChanged((user) => {
+            console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
+            if (user) {
+                updateUIForUser(user);
+                loadUserContent(user.uid);
+            } else {
+                // Reset UI to logged-out state
+                updateCreatorHubUI(null);
+                const loginButton = document.getElementById('loginButton');
+                if (loginButton) loginButton.classList.remove('hidden');
+                
+                const userSection = document.getElementById('userSection');
+                if (userSection) userSection.classList.add('hidden');
+            }
+        });
+
+        async function loadUserContent(userId) {
+            try {
+                const userDocs = await db.collection('users')
+                    .doc(userId)
+                    .collection('documents')
+                    .orderBy('timestamp', 'desc')
+                    .get();
+
+                const contentGrid = document.getElementById('contentGrid');
+                contentGrid.innerHTML = ''; // Clear existing content
+
+                userDocs.forEach(doc => {
+                    const data = doc.data();
+                    updateContentGrid({
+                        title: data.title,
+                        timestamp: data.timestamp.toDate(),
+                        hash: data.hash,
+                        txUrl: data.txUrl
+                    });
+                });
+
+                // Update stats after loading content
+                await updateUserStats(userId);
+            } catch (error) {
+                console.error('Error loading user content:', error);
+                showError('Failed to load content: ' + error.message);
+            }
+        }
+
+        // Add these functions to your existing script section
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        // Add these functions to your existing script section
+        function showAuthModal(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            console.log('Opening auth modal');
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            } else {
+                console.error('Auth modal not found');
+            }
+        }
+
+        // Add this after Firebase initialization
+        function checkFirebaseInit() {
+            console.log('Checking Firebase initialization...');
+            console.log('Firebase app:', firebase.app());
+            console.log('Auth:', auth);
+            console.log('Firestore:', db);
+        }
+
+        // Call it when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            checkFirebaseInit();
+        });
+
+        // Add this function to update Creator's Hub UI
+        function updateCreatorHubUI(user) {
+            const creatorStatusElement = document.querySelector('.creator-status');
+            const creatorLoginButton = document.querySelector('.creator-login-button');
+            const uploadSection = document.querySelector('.upload-section');
+            
+            if (user) {
+                // Update creator status
+                if (creatorStatusElement) {
+                    creatorStatusElement.textContent = user.email;
+                    creatorStatusElement.classList.remove('text-gray-500');
+                    creatorStatusElement.classList.add('text-blue-600', 'font-semibold');
+                }
+                
+                // Hide login button
+                if (creatorLoginButton) {
+                    creatorLoginButton.classList.add('hidden');
+                }
+                
+                // Show upload section
+                if (uploadSection) {
+                    uploadSection.classList.remove('hidden');
+                }
+            } else {
+                // Reset to guest state
+                if (creatorStatusElement) {
+                    creatorStatusElement.textContent = 'Guest Creator';
+                    creatorStatusElement.classList.remove('text-blue-600', 'font-semibold');
+                    creatorStatusElement.classList.add('text-gray-500');
+                }
+                
+                // Show login button
+                if (creatorLoginButton) {
+                    creatorLoginButton.classList.remove('hidden');
+                }
+                
+                // Hide upload section
+                if (uploadSection) {
+                    uploadSection.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update the sign out functionality
+        async function handleSignOut() {
+            try {
+                await auth.signOut();
+                
+                // Reset UI immediately
+                const loginButton = document.getElementById('loginButton');
+                if (loginButton) loginButton.classList.remove('hidden');
+                
+                const userSection = document.getElementById('userSection');
+                if (userSection) userSection.classList.add('hidden');
+                
+                // Reset Creator's Hub UI
+                updateCreatorHubUI(null);
+                
+                // Clear content grid
+                const contentGrid = document.getElementById('contentGrid');
+                if (contentGrid) contentGrid.innerHTML = '';
+                
+                // Switch back to home section
+                showSection('home');
+                
+                // Reset any active navigation highlights
+                document.querySelectorAll('.nav-button').forEach(button => {
+                    button.classList.remove('text-blue-600');
+                });
+                
+                console.log('Successfully signed out');
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showError('Failed to sign out: ' + error.message);
+            }
+        }
+
+        // Add this function to update stats
+        async function updateUserStats(userId) {
+            try {
+                // Get user's documents
+                const userDocs = await db.collection('users')
+                    .doc(userId)
+                    .collection('documents')
+                    .get();
+
+                // Update upload count
+                const uploadCount = userDocs.size;
+                const uploadCountElement = document.getElementById('uploadCount');
+                if (uploadCountElement) {
+                    uploadCountElement.textContent = uploadCount;
+                }
+
+                // Calculate total size (if you store file sizes)
+                let totalSize = 0;
+                userDocs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.fileSize) {
+                        totalSize += data.fileSize;
+                    }
+                });
+
+                // Update total size display (convert to MB)
+                const totalSizeElement = document.getElementById('totalSize');
+                if (totalSizeElement) {
+                    const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+                    totalSizeElement.textContent = `${sizeMB} MB`;
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Add these functions to your script section
+        function initializeAuthenticate() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const walletInputArea = document.getElementById('walletInputArea');
+
+            // Handle file selection
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+
+            // Handle click on drop area
+            dropArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // Handle drag and drop
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropArea.classList.add('border-blue-500');
+            });
+
+            dropArea.addEventListener('dragleave', function() {
+                dropArea.classList.remove('border-blue-500');
+            });
+
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropArea.classList.remove('border-blue-500');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        function handleFileSelection(file) {
+            if (!file) return;
+
+            // Show the file preview
+            const thumbnail = document.getElementById('thumbnail');
+            if (thumbnail) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        thumbnail.innerHTML = `<img src="${e.target.result}" class="max-h-48 rounded-lg">`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    thumbnail.innerHTML = `
+                        <div class="bg-gray-100 p-4 rounded-lg text-center">
+                            <p class="text-gray-600">${file.name}</p>
+                            <p class="text-sm text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Auto-fill the wallet address
+            const walletInput = document.getElementById('walletInput');
+            if (walletInput) {
+                walletInput.value = "addr_test1qz8na2e74ewzkn6aekrtutlf93fmsrpst5runwe4frezvf2u5qvmpqpcz8fd848xf9efhjd3xmnmud538w6gplr3hj3qvhy6dd";
+            }
+        }
+
+        // Initialize authenticate section when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAuthenticate();
+        });
     </script>
     <!-- Add this where you want the download button to appear -->
     <div>
