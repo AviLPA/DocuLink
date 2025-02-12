@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import json
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -20,31 +21,34 @@ try:
 except Exception as e:
     print(f"Note: .env file not found or couldn't be loaded. This is normal in production.")
 
-# Get config from environment variables
-config = {
-    "type": os.getenv("FIREBASE_TYPE", "service_account"),
-    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-    "private_key": os.getenv("FIREBASE_PRIVATE_KEY", "").replace("\\n", "\n"),
-    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-    "auth_uri": os.getenv("FIREBASE_AUTH_URI", "https://accounts.google.com/o/oauth2/auth"),
-    "token_uri": os.getenv("FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token"),
-    "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL", "https://www.googleapis.com/oauth2/v1/certs"),
-    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_X509_CERT_URL")
-}
+# Get credentials from environment variable
+creds_json = os.getenv("FIREBASE_CREDENTIALS")
+if not creds_json:
+    raise ValueError("FIREBASE_CREDENTIALS environment variable not found")
 
 # Print relevant environment variables (excluding sensitive data)
 print("\nRelevant environment variables after loading:")
 print(f"FLASK_ENV: {os.getenv('FLASK_ENV')}")
 print(f"PORT: {os.getenv('PORT')}")
 
-# Initialize Firebase Admin
+# Add debug logging for the private key format
+print("\nPrivate key verification:")
+pk = config.get("private_key", "")
+print(f"Starts with correct header: {pk.startswith('-----BEGIN PRIVATE KEY-----')}")
+print(f"Ends with correct footer: {pk.endswith('-----END PRIVATE KEY-----\n')}")
+print(f"Contains newlines: {'\\n' in pk}")
+
 try:
-    # Initialize directly with config dictionary instead of file
+    # Parse the JSON string
+    config = json.loads(creds_json)
+    
+    # Initialize Firebase Admin
     cred = credentials.Certificate(config)
     firebase_admin.initialize_app(cred)
-    print(f"Successfully initialized Firebase with credentials from environment variables")
+    print("Successfully initialized Firebase with credentials")
+except json.JSONDecodeError as e:
+    print(f"Error parsing credentials JSON: {e}")
+    raise
 except Exception as e:
     print(f"Error initializing Firebase: {e}")
     raise

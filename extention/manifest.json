@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Video Verification",
+  "description": "Select a video from Google Drive and verify its authenticity using blockchain.",
+  "version": "1.0",
+  "permissions": [
+    "identity",
+    "identity.email",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "oauth2": {
+    "client_id": "1098133808746-mbokvvejb0hflhsv8d7j18sr1fljmkm5.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.file"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
+
