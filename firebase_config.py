@@ -31,16 +31,18 @@ print("\nRelevant environment variables after loading:")
 print(f"FLASK_ENV: {os.getenv('FLASK_ENV')}")
 print(f"PORT: {os.getenv('PORT')}")
 
-# Add debug logging for the private key format
-print("\nPrivate key verification:")
-pk = config.get("private_key", "")
-print(f"Starts with correct header: {pk.startswith('-----BEGIN PRIVATE KEY-----')}")
-print(f"Ends with correct footer: {pk.endswith('-----END PRIVATE KEY-----\n')}")
-print("Contains newlines:", "\n" in pk)
-
 try:
     # Parse the JSON string
     config = json.loads(creds_json)
+    
+    # Add debug logging for the private key format
+    print("\nPrivate key verification:")
+    pk = config.get("private_key", "")
+    header = '-----BEGIN PRIVATE KEY-----'
+    footer = '-----END PRIVATE KEY-----\n'
+    print(f"Starts with correct header: {pk.startswith(header)}")
+    print(f"Ends with correct footer: {pk.endswith(footer)}")
+    print("Contains newlines:", "\n" in pk)
     
     # Initialize Firebase Admin
     cred = credentials.Certificate(config)
