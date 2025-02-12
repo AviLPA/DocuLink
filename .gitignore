@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Node
+node_modules/
+npm-debug.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Firebase
+doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
+
+# Build directories
+dist/
+build/
+
+uploads/
+comparisons/ 
