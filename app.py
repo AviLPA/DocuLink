@@ -969,14 +969,13 @@ def verify():
 
 def query_blockchain(file_hash, wallet_address=None):
     if not wallet_address:
-        wallet_address = "addr1qykjh9xrj566jmm5em0epzmsfmdfvpw86nnc3g8f7zsn83u6u3a9lm3zqxwg6sn2m93cm0leqtam6apzje45xcw9dq5s6u8l33"
+        wallet_address = WALLET_ADDRESS
     try:
         api = BlockFrostApi(
             project_id=API_KEY
         )
         
         print(f"Querying transactions for wallet: {wallet_address}")
-        print(f"Looking for hash: {file_hash}")  # Add this line
         
         try:
             transactions = api.address_transactions(
@@ -1061,29 +1060,31 @@ def query_blockchain(file_hash, wallet_address=None):
             return {'found': False}
             
         except ApiError as e:
+            print(f"Blockfrost API error: {str(e)}")
+            print(f"Status code: {e.status_code}")
             if e.status_code == 404:
                 print(f"No transactions found for address {wallet_address}")
                 return {'found': False}
-            raise
+            return {'found': False, 'error': str(e)}
             
     except Exception as e:
-        print(f"Error querying blockchain: {e}")
-        raise Exception(f"Blockchain query failed: {e}")
+        print(f"Error querying blockchain: {str(e)}")
+        return {'found': False, 'error': str(e)}
 
 def verify_api_key():
     try:
         api = BlockFrostApi(
             project_id=API_KEY
         )
-        # Try to get the latest block as a simple test
         latest_block = api.block_latest()
         print(f"API connection successful. Latest block: {latest_block.hash}")
         return True
+    except ApiError as e:
+        print(f"API connection failed: {str(e)}")
+        print(f"Status code: {e.status_code}")
+        return False
     except Exception as e:
         print(f"API connection failed: {str(e)}")
-        if isinstance(e, ApiError):
-            print(f"Status code: {e.status_code}")
-            print(f"Response: {e.response}")
         return False
 
 # Add this near your app initialization
