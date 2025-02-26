@@ -18,8 +18,24 @@ except Exception as e:
     print(f"Note: .env file not found or couldn't be loaded. This is normal in production.")
 
 try:
+    # Check for credentials in environment variable first (for production/Render)
+    firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS')
+    
+    if firebase_creds_json:
+        # Parse the JSON string from environment variable
+        print("Using Firebase credentials from environment variable")
+        creds_dict = json.loads(firebase_creds_json)
+        cred = credentials.Certificate(creds_dict)
+    else:
+        # Fall back to file for local development
+        creds_file = 'doculink-4db99-firebase-adminsdk-fbsvc-5fc4ba8a7c.json'
+        if os.path.exists(creds_file):
+            print(f"Using Firebase credentials from file: {creds_file}")
+            cred = credentials.Certificate(creds_file)
+        else:
+            raise FileNotFoundError(f"Firebase credentials file not found: {creds_file}")
+    
     # Initialize Firebase
-    cred = credentials.Certificate('doculink-4db99-firebase-adminsdk-fbsvc-5fc4ba8a7c.json')
     firebase_admin.initialize_app(cred)
     print("Successfully initialized Firebase")
     
