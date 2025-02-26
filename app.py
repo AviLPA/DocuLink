@@ -106,6 +106,46 @@ load_dotenv()
 # Initialize Blockfrost API
 BLOCKFROST_PROJECT_ID = os.getenv('BLOCKFROST_PROJECT_ID')
 
+print("Python version:", sys.version)
+print("Current working directory:", os.getcwd())
+
+# Add this near the top after imports
+if not os.path.exists('.env'):
+    print("WARNING: .env file not found!")
+else:
+    print("Found .env file")
+
+# Add near the top of your file, after loading environment variables
+if not API_KEY:
+    print("WARNING: No Blockfrost API key found in environment variables!")
+    print("Please set BLOCKFROST_API_KEY in your .env file")
+
+# Also verify the network
+print(f"Using Cardano network: {NETWORK}")
+print(f"Using API URL: {API_URL}")
+
+# Add near your Firebase initialization
+try:
+    # Change this line to match your actual file name
+    if not os.path.exists('doculink-4db99-firebase-adminsdk-fbsvc-5fc4ba8a7c.json'):
+        print("WARNING: Firebase credentials file not found!")
+        print(f"Looking for file at: {os.path.abspath('doculink-4db99-firebase-adminsdk-fbsvc-5fc4ba8a7c.json')}")
+    else:
+        print("Firebase credentials file found")
+    
+    # Initialize Firebase with the correct credentials file
+    if not firebase_admin._apps:
+        cred = credentials.Certificate('doculink-4db99-firebase-adminsdk-fbsvc-5fc4ba8a7c.json')
+        firebase_admin.initialize_app(cred)
+    
+    # Test Firebase connection
+    db = firestore.client()
+    # Try a simple operation
+    db.collection('test').document('test').get()
+    print("Firebase connection successful")
+except Exception as e:
+    print(f"Firebase error: {str(e)}")
+
 def hash_binary_data(binary_data):
     try:
         python_logging.debug("Hashing binary data")
@@ -908,6 +948,7 @@ def get_thumbnail(hash):
 
 @app.route('/verify', methods=['POST'])
 def verify():
+    print("API_KEY:", API_KEY)  # Add this line
     if 'file' not in request.files:
         return jsonify({'success': False, 'message': 'No file uploaded'})
     
@@ -946,13 +987,15 @@ def verify():
                     'success': True,
                     'message': 'Content verified on blockchain!',
                     'txHash': blockchain_result['txHash'],
-                    'owner': blockchain_result['owner']  # Removed timestamp
+                    'owner': blockchain_result['owner'],
+                    'hash': file_hash
                 })
             else:
                 return jsonify({
                     'success': False,
                     'message': 'Content not found on blockchain',
-                    'details': 'This content has not been registered or the wallet address does not match'
+                    'details': 'This content has not been registered or the wallet address does not match',
+                    'hash': file_hash
                 })
                 
         finally:
@@ -971,10 +1014,15 @@ def query_blockchain(file_hash, wallet_address=None):
     if not wallet_address:
         wallet_address = WALLET_ADDRESS
     try:
+        if not API_KEY:
+            print("ERROR: No API key found")
+            return {'found': False, 'error': 'Missing API key'}
+            
         api = BlockFrostApi(
             project_id=API_KEY
         )
         
+        print(f"Using API key: {API_KEY[:5]}...")  # Only print first 5 chars for security
         print(f"Querying transactions for wallet: {wallet_address}")
         
         try:
@@ -1062,9 +1110,10 @@ def query_blockchain(file_hash, wallet_address=None):
         except ApiError as e:
             print(f"Blockfrost API error: {str(e)}")
             print(f"Status code: {e.status_code}")
-            if e.status_code == 404:
-                print(f"No transactions found for address {wallet_address}")
-                return {'found': False}
+            if e.status_code == 403:
+                return {'found': False, 'error': 'Invalid API key or insufficient permissions'}
+            elif e.status_code == 404:
+                return {'found': False, 'error': f"No transactions found for address {wallet_address}"}
             return {'found': False, 'error': str(e)}
             
     except Exception as e:
@@ -1091,18 +1140,26 @@ def verify_api_key():
 if not verify_api_key():
     print("Warning: Unable to verify Blockfrost API key")
 
+# Add this before app.run()
 if __name__ == '__main__':
-    # Create required directories if they don't exist
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')
-    if not os.path.exists('comparisons'):
-        os.makedirs('comparisons')
-    
-    # Get port from environment variable (for Render) or use default 5008
-    port = int(os.environ.get('PORT', 5008))
-    
-    # In development (local) use debug mode, in production don't
-    debug_mode = os.environ.get('FLASK_ENV') != 'production'
-    
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    print("Starting Flask application...")
+    try:
+        # Create required directories if they don't exist
+        os.makedirs('uploads', exist_ok=True)
+        os.makedirs('comparisons', exist_ok=True)
+        print("Created required directories")
+        
+        # Get port from environment variable (for Render) or use default 5008
+        port = int(os.environ.get('PORT', 5008))
+        print(f"Using port: {port}")
+        
+        # In development (local) use debug mode, in production don't
+        debug_mode = os.environ.get('FLASK_ENV') != 'production'
+        print(f"Debug mode: {debug_mode}")
+        
+        print("Starting Flask server...")
+        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    except Exception as e:
+        print(f"Error starting application: {e}")
+        raise
 
