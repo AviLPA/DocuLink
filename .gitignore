@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
 env/
 .env
 
@@ -13,13 +14,26 @@ npm-debug.log
 # System files
 .DS_Store
 Thumbs.db
+.vscode/
 
 # Firebase
 doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
+.firebaserc
+firebase.json
+firestore.indexes.json
 
 # Build directories
 dist/
 build/
 
+# Upload directories
 uploads/
-comparisons/ 
+comparisons/
+
+# Local development
+Procfile
+render.yaml doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
+doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
+.env
+__pycache__/
+*.pyc
