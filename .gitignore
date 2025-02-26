@@ -17,10 +17,9 @@ Thumbs.db
 .vscode/
 
 # Firebase
-doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
-.firebaserc
-firebase.json
-firestore.indexes.json
+doculink-4db99-firebase-adminsdk-fbsvc-*.json
+*firebase-adminsdk*.json
+firebase-credentials*.json
 
 # Build directories
 dist/
@@ -32,8 +31,7 @@ comparisons/
 
 # Local development
 Procfile
-render.yaml doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
-doculink-4db99-firebase-adminsdk-fbsvc-6dcd0f868f.json
-.env
-__pycache__/
-*.pyc
+render.yaml
+
+# Blockfrost API keys
+.blockfrost

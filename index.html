@@ -1,0 +1,158 @@
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded");
+    
+    // Delay initialization slightly to ensure all elements are rendered
+    setTimeout(function() {
+        initializeNavigation();
+        initializeWalletCopyButton();
+        
+        // Check if Firebase is initialized
+        if (typeof firebase !== 'undefined') {
+            console.log("Checking Firebase initialization...");
+            console.log("Firebase app:", firebase.app());
+            console.log("Auth:", firebase.auth());
+            console.log("Firestore:", firebase.firestore());
+            
+            // Initialize Firebase auth state observer
+            initializeAuthStateObserver();
+            
+            // Initialize all sections that require Firebase
+            initializeAuthenticate();
+            initializeCreatorHub();
+            initializeVerification();
+        } else {
+            console.error("Firebase not initialized!");
+        }
+        
+        // Initialize sections that don't require Firebase
+        initializeStatistics();
+        
+        // Show the initial section
+        showSection('home');
+    }, 500); // 500ms delay to ensure everything is loaded
+});
+
+// Add this function to check if elements exist before initializing
+function elementExists(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with ID '${id}' not found`);
+        return false;
+    }
+    return true;
+}
+
+// Update your initializeNavigation function
+function initializeNavigation() {
+    console.log("Initializing navigation");
+    
+    // Get all navigation links
+    const navLinks = document.querySelectorAll('[data-section]');
+    
+    // Add click event listeners to each link
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = this.getAttribute('data-section');
+            console.log(`Navigation link clicked: ${section}`);
+            showSection(section);
+        });
+    });
+}
+
+// Make sure your showSection function is robust
+function showSection(sectionId) {
+    console.log(`Attempting to show section: ${sectionId}`);
+    
+    // Get all sections
+    const sections = document.querySelectorAll('.section');
+    
+    // Hide all sections
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show the selected section
+    const selectedSection = document.getElementById(sectionId);
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+        console.log(`Section ${sectionId} is now visible`);
+    } else {
+        console.error(`Section with ID ${sectionId} not found`);
+    }
+}
+
+function initializeAuthenticate() {
+    console.log("Initializing authentication section");
+    
+    // Check if elements exist before adding event listeners
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Login logic
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            loginWithEmailPassword(email, password);
+        });
+    } else {
+        console.warn("Login form element not found");
+    }
+    
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Register logic
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            registerWithEmailPassword(email, password);
+        });
+    } else {
+        console.warn("Register form element not found");
+    }
+    
+    // Add similar checks for other elements
+    const googleLoginBtn = document.getElementById('google-login');
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', signInWithGoogle);
+    }
+    
+    // Add this debug code to see what's null
+    console.log("Login form:", loginForm);
+    console.log("Register form:", registerForm);
+    console.log("Google login button:", googleLoginBtn);
+}
+
+async function loadUserContent() {
+    try {
+        console.log("Loading user content...");
+        const user = auth.currentUser;
+        if (!user) {
+            console.log("No user logged in");
+            return;
+        }
+        
+        console.log("Attempting to access user document");
+        // Try with error handling for each collection
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            console.log("Successfully accessed user document:", userDoc.exists);
+        } catch (e) {
+            console.error("Error accessing users collection:", e);
+        }
+        
+        try {
+            const contentDocs = await db.collection('content').where('userId', '==', user.uid).get();
+            console.log("Successfully accessed content collection:", !contentDocs.empty);
+        } catch (e) {
+            console.error("Error accessing content collection:", e);
+        }
+        
+        // Continue with your existing code...
+        
+    } catch (error) {
+        console.error("Error loading user content:", error);
+    }
+} 
