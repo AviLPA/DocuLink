@@ -7,6 +7,7 @@
  2) Upload the Image to the Authenticate
  3) The wallet Address is put in automatically
  4) Press Verify
+ 5) Upload a random image and check if it's verified ;) 
 
 (You can upload your own content and get a Hash in the Creators Hub (JPEG) (Sign up with a fictional Email). While it will create the Hash, we have disabeled the blockchain conenction due to API limits)
 
