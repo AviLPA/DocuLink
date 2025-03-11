@@ -3,7 +3,7 @@
  Test us out: https://testweb1-lb23.onrender.com/
 
  Steps:
- 1) Download the test image from the sit (you will see a button up top)
+ 1) Download the test image from the site (you will see a button up top)
  2) Upload the Image to the Authenticate
  3) The wallet Address is put in automatically
  4) Press Verify
